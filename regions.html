@@ -45,9 +45,11 @@
 </div>
 <div id="footer-placeholder"></div>
 <script src="js/data.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase.js"></script>
 <script src="js/app.js"></script>
 <script>
-let filtered = [...HH.regions];
+let filtered = [];
 
 function render() {
   const grid = document.getElementById('regions-grid');
@@ -72,7 +74,7 @@ function applyFilters() {
 
 document.getElementById('filter-type').addEventListener('change', applyFilters);
 document.getElementById('search-input').addEventListener('input', applyFilters);
-document.addEventListener('DOMContentLoaded', render);
+window.__HH_READY.then(() => { filtered = [...HH.regions]; render(); });
 </script>
 </body>
 </html>

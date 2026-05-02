@@ -52,9 +52,11 @@
 </div>
 <div id="footer-placeholder"></div>
 <script src="js/data.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase.js"></script>
 <script src="js/app.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', () => {
+window.__HH_READY.then(() => {
   const sel = document.getElementById('filter-region');
   HH.regions.forEach(r => {
     const o = document.createElement('option');
