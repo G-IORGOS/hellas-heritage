@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="page-title">Περιοχή — Hellas Heritage</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="navbar-placeholder"></div>
+<div class="page-wrapper">
+
+  <!-- Region Hero -->
+  <div id="region-hero" class="detail-hero" style="position:relative;overflow:hidden">
+    <div id="hero-bg" style="position:absolute;inset:0;background-size:cover;background-position:center;opacity:.3"></div>
+    <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(15,35,71,.9),rgba(15,35,71,.6))"></div>
+    <div class="container" style="position:relative;z-index:2">
+      <div class="breadcrumb"><a href="index.html">Αρχική</a> › <a href="regions.html">Περιοχές</a> › <span id="breadcrumb-name"></span></div>
+      <div class="detail-layout">
+        <div class="detail-info">
+          <div class="detail-chips" id="region-chips"></div>
+          <h1 class="detail-info" id="region-name" style="color:white;font-size:clamp(2rem,5vw,3.5rem)"></h1>
+          <p id="region-name-en" style="color:rgba(255,255,255,.6);font-style:italic;margin-bottom:1rem"></p>
+          <p id="region-desc" style="color:rgba(255,255,255,.85);font-size:1.05rem;line-height:1.8;max-width:600px"></p>
+          <div style="display:flex;gap:2rem;margin-top:2rem">
+            <div style="text-align:center;color:white">
+              <div id="stat-c" style="font-family:var(--font-serif);font-size:2.5rem;color:#e8c85a"></div>
+              <div style="font-size:.78rem;opacity:.7">ΦΟΡΕΣΙΕΣ</div>
+            </div>
+            <div style="text-align:center;color:white">
+              <div id="stat-cu" style="font-family:var(--font-serif);font-size:2.5rem;color:#e8c85a"></div>
+              <div style="font-size:.78rem;opacity:.7">ΕΘΙΜΑ</div>
+            </div>
+          </div>
+        </div>
+        <div class="detail-image" style="height:320px">
+          <img id="region-img" src="" alt="">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Region Costumes -->
+  <section style="background:white">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-label">Φορεσιές</span>
+        <h2 id="costumes-title">Παραδοσιακές Φορεσιές</h2>
+      </div>
+      <div class="grid-4" id="region-costumes">
+        <div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--grey-400)">Δεν υπάρχουν ακόμα φορεσιές για αυτή την περιοχή.</div>
+      </div>
+      <div style="text-align:center;margin-top:2rem">
+        <a href="costumes.html" class="btn btn-ghost btn-sm">Δες Όλες →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Region Customs -->
+  <section style="background:var(--grey-100)">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-label">Έθιμα & Παραδόσεις</span>
+        <h2 id="customs-title">Τοπικά Έθιμα</h2>
+      </div>
+      <div class="grid-3" id="region-customs">
+        <div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--grey-400)">Δεν υπάρχουν ακόμα έθιμα για αυτή την περιοχή.</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+<div id="footer-placeholder"></div>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const id = parseInt(getParam('id'));
+  const r  = HH.regions.find(x => x.id === id);
+  if (!r) { document.body.innerHTML = '<div style="padding:5rem;text-align:center"><h2>Περιοχή δεν βρέθηκε</h2><a href="regions.html">← Πίσω</a></div>'; return; }
+
+  document.getElementById('page-title').textContent = r.name + ' — Hellas Heritage';
+  document.getElementById('hero-bg').style.backgroundImage = `url('${r.image}')`;
+  document.getElementById('breadcrumb-name').textContent = r.name;
+  document.getElementById('region-name').textContent = r.name;
+  document.getElementById('region-name-en').textContent = r.nameEn;
+  document.getElementById('region-desc').textContent = r.description;
+  document.getElementById('region-img').src = r.image;
+  document.getElementById('region-img').alt = r.name;
+  document.getElementById('stat-c').textContent = r.costumesCount;
+  document.getElementById('stat-cu').textContent = r.customsCount;
+  document.getElementById('region-chips').innerHTML = `
+    <span class="chip chip-navy">${regionTypeBadge(r.type)}</span>
+    <span class="chip chip-gold">${r.nameEn}</span>`;
+  document.getElementById('costumes-title').textContent = 'Φορεσιές της ' + r.name;
+  document.getElementById('customs-title').textContent = 'Έθιμα της ' + r.name;
+
+  const costumes = HH.costumes.filter(c => c.regionId === id);
+  if (costumes.length) document.getElementById('region-costumes').innerHTML = costumes.map(renderCostumeCard).join('');
+
+  const customs = HH.customs.filter(c => c.regionId === id);
+  if (customs.length) document.getElementById('region-customs').innerHTML = customs.map(renderCustomCard).join('');
+});
+</script>
+</body>
+</html>

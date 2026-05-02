@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="page-title">Έθιμο — Hellas Heritage</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="navbar-placeholder"></div>
+<div class="page-wrapper">
+
+  <div class="detail-hero" style="position:relative;overflow:hidden">
+    <div id="hero-bg" style="position:absolute;inset:0;background-size:cover;background-position:center;opacity:.25"></div>
+    <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(15,35,71,.9),rgba(15,35,71,.55))"></div>
+    <div class="container" style="position:relative;z-index:2;padding-top:2rem;padding-bottom:3rem">
+      <div class="breadcrumb"><a href="index.html">Αρχική</a> › <a href="customs.html">Έθιμα</a> › <span id="bc-name"></span></div>
+      <div class="detail-layout" style="margin-top:1.5rem">
+        <div class="detail-info">
+          <div class="detail-chips" id="chips"></div>
+          <h1 id="cu-name" style="color:white;margin:.5rem 0"></h1>
+          <p id="cu-name-en" style="color:rgba(255,255,255,.55);font-style:italic;margin-bottom:1rem"></p>
+          <p id="cu-excerpt" style="color:rgba(255,255,255,.85);line-height:1.75;max-width:580px"></p>
+        </div>
+        <div style="border-radius:var(--radius-lg);overflow:hidden;aspect-ratio:4/3;box-shadow:0 20px 60px rgba(0,0,0,.4)">
+          <img id="cu-img" src="" alt="" style="width:100%;height:100%;object-fit:cover">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Premium Gate -->
+  <div id="premium-gate" style="display:none;background:linear-gradient(135deg,var(--navy-dark),var(--navy-mid));color:white;padding:3rem;text-align:center">
+    <div style="font-size:3rem;margin-bottom:1rem">🔒</div>
+    <h2 style="color:#e8c85a;margin-bottom:.75rem">Premium Περιεχόμενο</h2>
+    <p style="color:rgba(255,255,255,.8);max-width:480px;margin:0 auto 1.5rem">Αποκτήστε premium πρόσβαση για την πλήρη περιγραφή, τα βήματα τελετουργίας και αρχειακό υλικό.</p>
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+      <a href="pricing.html" class="btn btn-primary">Δες τα Πακέτα</a>
+      <a href="login.html" class="btn btn-outline">Δωρεάν Δοκιμή 7 Ημερών</a>
+    </div>
+  </div>
+
+  <!-- Custom Body -->
+  <div id="custom-body">
+    <section style="background:white">
+      <div class="container">
+        <div style="max-width:800px;margin:0 auto">
+          <div class="detail-section">
+            <h2>Πλήρης Περιγραφή</h2>
+            <p id="cu-desc"></p>
+          </div>
+          <div class="detail-section" id="steps-section">
+            <h2>Βήματα Τελετουργίας</h2>
+            <div class="steps-list" id="steps-list"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section style="background:var(--grey-100)">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-label">Περισσότερα</span>
+          <h2>Σχετικά Έθιμα</h2>
+        </div>
+        <div class="grid-3" id="related"></div>
+      </div>
+    </section>
+  </div>
+
+</div>
+<div id="footer-placeholder"></div>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const id = parseInt(getParam('id'));
+  const cu = HH.customs.find(x => x.id === id);
+  if (!cu) { document.body.innerHTML = '<div style="padding:5rem;text-align:center"><h2>Δεν βρέθηκε</h2><a href="customs.html">← Πίσω</a></div>'; return; }
+
+  document.getElementById('page-title').textContent = cu.name + ' — Hellas Heritage';
+  document.getElementById('hero-bg').style.backgroundImage = `url('${cu.image}')`;
+  document.getElementById('bc-name').textContent = cu.name;
+  document.getElementById('cu-name').textContent = cu.name;
+  document.getElementById('cu-name-en').textContent = cu.nameEn || '';
+  document.getElementById('cu-img').src = cu.image;
+  document.getElementById('cu-img').alt = cu.name;
+  document.getElementById('cu-excerpt').textContent = cu.description.substring(0,200) + '...';
+
+  document.getElementById('chips').innerHTML = `
+    <span class="chip chip-gold">${categoryLabel(cu.category)}</span>
+    <span class="chip chip-navy">📍 ${regionName(cu.regionId)}</span>
+    <span class="chip chip-navy">📅 ${cu.periodOfYear}</span>
+    ${cu.isPremium ? '<span class="chip" style="background:rgba(184,134,11,.2);color:#e8c85a;border:1px solid rgba(184,134,11,.3)">✦ Premium</span>' : ''}`;
+
+  if (cu.isPremium) {
+    document.getElementById('premium-gate').style.display = 'block';
+    document.getElementById('custom-body').style.display = 'none';
+  } else {
+    document.getElementById('cu-desc').textContent = cu.description;
+    if (cu.steps && cu.steps.length) {
+      document.getElementById('steps-list').innerHTML = cu.steps.map((s, i) => `
+        <div class="step-item">
+          <div class="step-num">${i+1}</div>
+          <div class="step-content">
+            <h4>${s.title}</h4>
+            <p>${s.description}</p>
+          </div>
+        </div>`).join('');
+    } else {
+      document.getElementById('steps-section').style.display = 'none';
+    }
+  }
+
+  const related = HH.customs.filter(x => x.category === cu.category && x.id !== id).slice(0,3);
+  document.getElementById('related').innerHTML = related.length
+    ? related.map(renderCustomCard).join('')
+    : '<p style="grid-column:1/-1;text-align:center;color:var(--grey-400)">Δεν υπάρχουν ακόμα σχετικά έθιμα.</p>';
+});
+</script>
+</body>
+</html>

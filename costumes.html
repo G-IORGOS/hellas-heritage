@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Παραδοσιακές Φορεσιές — Hellas Heritage</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="navbar-placeholder" data-active="Φορεσιές"></div>
+<div class="page-wrapper">
+
+  <div class="page-hero">
+    <div class="container">
+      <div class="breadcrumb"><a href="index.html">Αρχική</a> › Φορεσιές</div>
+      <h1>Παραδοσιακές Φορεσιές</h1>
+      <p>Εξερεύνησε εκατοντάδες φορεσιές από κάθε γωνιά της Ελλάδας — κάθε ένδυμα αφηγείται μια ξεχωριστή ιστορία</p>
+    </div>
+  </div>
+
+  <section style="background:var(--cream)">
+    <div class="container">
+      <div class="filters-bar">
+        <div class="filter-group">
+          <span class="filter-label">Περιοχή</span>
+          <select class="filter-select" id="filter-region">
+            <option value="">Όλες</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <span class="filter-label">Φύλο</span>
+          <select class="filter-select" id="filter-gender">
+            <option value="">Όλα</option>
+            <option value="ΓΥΝΑΙΚΕΙΑ">Γυναικεία</option>
+            <option value="ΑΝΔΡΙΚΗ">Ανδρική</option>
+            <option value="ΠΑΙΔΙΚΗ">Παιδική</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <span class="filter-label">Πρόσβαση</span>
+          <select class="filter-select" id="filter-premium">
+            <option value="">Όλες</option>
+            <option value="free">Δωρεάν</option>
+            <option value="premium">Premium</option>
+          </select>
+        </div>
+        <div class="filter-search">
+          <span class="filter-label">Αναζήτηση</span>
+          <input type="text" id="search-input" placeholder="Αναζήτησε φορεσιά...">
+        </div>
+        <div class="filter-count"><span id="count">0</span> φορεσιές</div>
+      </div>
+
+      <div class="grid-4" id="costumes-grid"></div>
+    </div>
+  </section>
+
+</div>
+<div id="footer-placeholder"></div>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script>
+// Populate region filter
+document.addEventListener('DOMContentLoaded', () => {
+  const sel = document.getElementById('filter-region');
+  HH.regions.forEach(r => {
+    const o = document.createElement('option');
+    o.value = r.id; o.textContent = r.name;
+    sel.appendChild(o);
+  });
+  render();
+});
+
+function render() {
+  const regionId = document.getElementById('filter-region').value;
+  const gender   = document.getElementById('filter-gender').value;
+  const premium  = document.getElementById('filter-premium').value;
+  const search   = document.getElementById('search-input').value.toLowerCase();
+
+  const filtered = HH.costumes.filter(c => {
+    if (regionId && c.regionId !== parseInt(regionId)) return false;
+    if (gender && c.gender !== gender) return false;
+    if (premium === 'free' && c.isPremium) return false;
+    if (premium === 'premium' && !c.isPremium) return false;
+    if (search && !c.name.toLowerCase().includes(search) && !c.description.toLowerCase().includes(search)) return false;
+    return true;
+  });
+
+  document.getElementById('count').textContent = filtered.length;
+  const grid = document.getElementById('costumes-grid');
+  if (!filtered.length) {
+    grid.innerHTML = '<div class="no-results"><h3>Δεν βρέθηκαν αποτελέσματα</h3><p>Δοκίμασε διαφορετικά φίλτρα</p></div>';
+    return;
+  }
+  grid.innerHTML = filtered.map(renderCostumeCard).join('');
+}
+
+['filter-region','filter-gender','filter-premium'].forEach(id =>
+  document.getElementById(id).addEventListener('change', render));
+document.getElementById('search-input').addEventListener('input', render);
+</script>
+</body>
+</html>

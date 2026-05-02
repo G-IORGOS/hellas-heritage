@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Έθιμα & Παραδόσεις — Hellas Heritage</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="navbar-placeholder" data-active="Έθιμα"></div>
+<div class="page-wrapper">
+
+  <div class="page-hero">
+    <div class="container">
+      <div class="breadcrumb"><a href="index.html">Αρχική</a> › Έθιμα</div>
+      <h1>Έθιμα & Παραδόσεις</h1>
+      <p>Από τα Αναστενάρια της Θράκης έως τον κρητικό γάμο — έθιμα που επιβιώνουν αιώνες</p>
+    </div>
+  </div>
+
+  <section style="background:var(--cream)">
+    <div class="container">
+      <div class="filters-bar">
+        <div class="filter-group">
+          <span class="filter-label">Κατηγορία</span>
+          <select class="filter-select" id="filter-cat">
+            <option value="">Όλες</option>
+            <option value="ΓΑΜΗΛΙΟ">Γαμήλιο</option>
+            <option value="ΘΡΗΣΚΕΥΤΙΚΟ">Θρησκευτικό</option>
+            <option value="ΕΠΟΧΙΑΚΟ">Εποχιακό</option>
+            <option value="ΚΟΙΝΩΝΙΚΟ">Κοινωνικό</option>
+            <option value="ΑΓΡΟΤΙΚΟ">Αγροτικό</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <span class="filter-label">Περιοχή</span>
+          <select class="filter-select" id="filter-region">
+            <option value="">Όλες</option>
+          </select>
+        </div>
+        <div class="filter-search">
+          <span class="filter-label">Αναζήτηση</span>
+          <input type="text" id="search-input" placeholder="Αναζήτησε έθιμο...">
+        </div>
+        <div class="filter-count"><span id="count">0</span> έθιμα</div>
+      </div>
+
+      <div class="grid-3" id="customs-grid"></div>
+    </div>
+  </section>
+
+</div>
+<div id="footer-placeholder"></div>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const sel = document.getElementById('filter-region');
+  HH.regions.forEach(r => {
+    const o = document.createElement('option');
+    o.value = r.id; o.textContent = r.name;
+    sel.appendChild(o);
+  });
+  render();
+});
+
+function render() {
+  const cat      = document.getElementById('filter-cat').value;
+  const regionId = document.getElementById('filter-region').value;
+  const search   = document.getElementById('search-input').value.toLowerCase();
+
+  const filtered = HH.customs.filter(c => {
+    if (cat && c.category !== cat) return false;
+    if (regionId && c.regionId !== parseInt(regionId)) return false;
+    if (search && !c.name.toLowerCase().includes(search) && !c.description.toLowerCase().includes(search)) return false;
+    return true;
+  });
+
+  document.getElementById('count').textContent = filtered.length;
+  const grid = document.getElementById('customs-grid');
+  if (!filtered.length) {
+    grid.innerHTML = '<div class="no-results"><h3>Δεν βρέθηκαν αποτελέσματα</h3><p>Δοκίμασε διαφορετικά φίλτρα</p></div>';
+    return;
+  }
+  grid.innerHTML = filtered.map(renderCustomCard).join('');
+}
+
+['filter-cat','filter-region'].forEach(id => document.getElementById(id).addEventListener('change', render));
+document.getElementById('search-input').addEventListener('input', render);
+</script>
+</body>
+</html>

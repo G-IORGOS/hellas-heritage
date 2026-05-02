@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="page-title">Φορεσιά — Hellas Heritage</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="navbar-placeholder"></div>
+<div class="page-wrapper">
+
+  <!-- Costume Hero -->
+  <div class="detail-hero" id="costume-hero" style="position:relative;overflow:hidden">
+    <div id="hero-bg" style="position:absolute;inset:0;background-size:cover;background-position:center;opacity:.25"></div>
+    <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(15,35,71,.9),rgba(15,35,71,.55))"></div>
+    <div class="container" style="position:relative;z-index:2;padding-top:2rem;padding-bottom:3rem">
+      <div class="breadcrumb"><a href="index.html">Αρχική</a> › <a href="costumes.html">Φορεσιές</a> › <span id="bc-name"></span></div>
+      <div class="detail-layout" style="margin-top:1.5rem">
+        <div class="detail-info">
+          <div class="detail-chips" id="chips"></div>
+          <h1 id="c-name" style="color:white;margin:0.5rem 0"></h1>
+          <p id="c-name-en" style="color:rgba(255,255,255,.55);font-style:italic;margin-bottom:1rem"></p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:1.25rem" id="c-meta-grid"></div>
+          <div style="margin-top:1.5rem;display:flex;gap:.75rem;flex-wrap:wrap">
+            <a id="btn-3d" href="viewer-3d.html" class="btn btn-primary btn-sm">🧊 Δες σε 3D Viewer</a>
+            <button onclick="showToast('Προσθέστε στα αγαπημένα σας!')" class="btn btn-outline btn-sm" style="border-color:rgba(255,255,255,.4)">♡ Αποθήκευση</button>
+          </div>
+        </div>
+        <div style="border-radius:var(--radius-lg);overflow:hidden;aspect-ratio:4/3;box-shadow:0 20px 60px rgba(0,0,0,.4)">
+          <img id="c-img" src="" alt="" style="width:100%;height:100%;object-fit:cover">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Premium Gate (shown only if premium) -->
+  <div id="premium-gate" style="display:none;background:linear-gradient(135deg,var(--navy-dark),var(--navy-mid));color:white;padding:3rem;text-align:center">
+    <div style="font-size:3rem;margin-bottom:1rem">🔒</div>
+    <h2 style="color:#e8c85a;margin-bottom:.75rem">Premium Περιεχόμενο</h2>
+    <p style="color:rgba(255,255,255,.8);max-width:480px;margin:0 auto 1.5rem">Αυτή η φορεσιά αποτελεί μέρος του premium αρχείου μας. Αποκτήστε πρόσβαση για να δείτε την πλήρη ιστορία, συμβολισμούς και gallery.</p>
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+      <a href="pricing.html" class="btn btn-primary">Δες τα Πακέτα</a>
+      <a href="login.html" class="btn btn-outline">Δωρεάν Δοκιμή 7 Ημερών</a>
+    </div>
+  </div>
+
+  <!-- Costume Body -->
+  <div id="costume-body">
+    <section style="background:white">
+      <div class="container">
+        <div style="max-width:800px;margin:0 auto">
+
+          <div class="detail-section">
+            <h2>Ιστορία & Πλαίσιο</h2>
+            <p id="c-history"></p>
+          </div>
+
+          <div class="detail-section">
+            <h2>Συμβολισμός</h2>
+            <p id="c-symbolism"></p>
+          </div>
+
+          <div class="detail-section">
+            <h2>Υλικά Κατασκευής</h2>
+            <div class="detail-materials" id="c-materials"></div>
+          </div>
+
+          <div class="detail-section">
+            <h2>Περίσταση Χρήσης</h2>
+            <p id="c-occasion"></p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Related Costumes -->
+    <section style="background:var(--grey-100)">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-label">Σχετικές</span>
+          <h2>Παρόμοιες Φορεσιές</h2>
+        </div>
+        <div class="grid-4" id="related"></div>
+      </div>
+    </section>
+  </div>
+
+</div>
+<div id="footer-placeholder"></div>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const id = parseInt(getParam('id'));
+  const c  = HH.costumes.find(x => x.id === id);
+  if (!c) { document.body.innerHTML = '<div style="padding:5rem;text-align:center"><h2>Φορεσιά δεν βρέθηκε</h2><a href="costumes.html">← Πίσω</a></div>'; return; }
+
+  document.getElementById('page-title').textContent = c.name + ' — Hellas Heritage';
+  document.getElementById('hero-bg').style.backgroundImage = `url('${c.image}')`;
+  document.getElementById('bc-name').textContent = c.name;
+  document.getElementById('c-name').textContent = c.name;
+  document.getElementById('c-name-en').textContent = c.nameEn || '';
+  document.getElementById('c-img').src = c.image;
+  document.getElementById('c-img').alt = c.name;
+
+  document.getElementById('chips').innerHTML = `
+    <span class="chip chip-gold">${genderLabel(c.gender)}</span>
+    <span class="chip chip-navy">📍 ${regionName(c.regionId)}</span>
+    ${c.isPremium ? '<span class="chip" style="background:rgba(184,134,11,.2);color:#e8c85a;border:1px solid rgba(184,134,11,.3)">✦ Premium</span>' : ''}`;
+
+  document.getElementById('c-meta-grid').innerHTML = [
+    ['📅 Περίοδος', c.period],
+    ['📍 Περιοχή', regionName(c.regionId)],
+    ['👤 Φύλο', genderLabel(c.gender)],
+    ['🎭 Περίσταση', c.occasion || '—'],
+  ].map(([label, val]) => `
+    <div style="background:rgba(255,255,255,.08);border-radius:10px;padding:.75rem 1rem">
+      <div style="font-size:.72rem;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.8px;margin-bottom:.2rem">${label}</div>
+      <div style="color:white;font-size:.9rem;font-weight:500">${val}</div>
+    </div>`).join('');
+
+  // Premium gate
+  if (c.isPremium) {
+    document.getElementById('premium-gate').style.display = 'block';
+    document.getElementById('costume-body').style.display = 'none';
+  } else {
+    document.getElementById('c-history').textContent = c.history_gr || c.description || '—';
+    document.getElementById('c-symbolism').textContent = c.symbolism || '—';
+    document.getElementById('c-occasion').textContent = c.occasion || '—';
+    document.getElementById('c-materials').innerHTML = (c.materials || []).map(m =>
+      `<span class="material-tag">${m}</span>`).join('') || '<span style="color:var(--grey-400)">—</span>';
+  }
+
+  // Related (same region, exclude current)
+  const related = HH.costumes.filter(x => x.regionId === c.regionId && x.id !== id).slice(0,4);
+  document.getElementById('related').innerHTML = related.length
+    ? related.map(renderCostumeCard).join('')
+    : '<p style="grid-column:1/-1;text-align:center;color:var(--grey-400)">Δεν υπάρχουν ακόμα σχετικές φορεσιές από αυτή την περιοχή.</p>';
+});
+</script>
+</body>
+</html>

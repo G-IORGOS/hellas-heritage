@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Συνδρομές & Τιμές — Hellas Heritage</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="navbar-placeholder" data-active="Συνδρομές"></div>
+<div class="page-wrapper">
+
+  <div class="page-hero">
+    <div class="container">
+      <div class="breadcrumb"><a href="index.html">Αρχική</a> › Συνδρομές</div>
+      <h1>Επίλεξε το Πλάνο σου</h1>
+      <p>Ξεκίνα δωρεάν — αναβάθμισε όταν είσαι έτοιμος. Ακύρωση οποτεδήποτε.</p>
+    </div>
+  </div>
+
+  <section style="background:var(--cream)">
+    <div class="container">
+
+      <!-- Billing toggle -->
+      <div style="display:flex;justify-content:center;align-items:center;gap:1rem;margin-bottom:3rem">
+        <span style="font-weight:600;color:var(--navy)">Μηνιαία χρέωση</span>
+        <label style="position:relative;display:inline-block;width:52px;height:28px;cursor:pointer">
+          <input type="checkbox" id="billing-toggle" style="opacity:0;width:0;height:0">
+          <span style="position:absolute;inset:0;background:var(--navy);border-radius:50px;transition:.3s;display:flex;align-items:center;padding-left:4px">
+            <span id="toggle-dot" style="width:22px;height:22px;background:white;border-radius:50%;transition:.3s;transform:translateX(0)"></span>
+          </span>
+        </label>
+        <span style="font-weight:600;color:var(--navy)">Ετήσια <span style="background:#22a84a;color:white;font-size:.72rem;padding:.15rem .5rem;border-radius:50px;margin-left:.3rem">-33%</span></span>
+      </div>
+
+      <!-- Pricing Cards -->
+      <div class="pricing-grid">
+        <!-- Free -->
+        <div class="pricing-card">
+          <div class="pricing-name">Δωρεάν</div>
+          <p style="font-size:.85rem;color:var(--grey-400)">Ξεκίνα να εξερευνάς</p>
+          <div class="pricing-price">
+            <span class="pricing-amount">€0</span>
+            <span class="pricing-period">για πάντα</span>
+          </div>
+          <ul class="pricing-features">
+            <li class="pricing-feature"><span class="check">✓</span> 10 φορεσιές</li>
+            <li class="pricing-feature"><span class="check">✓</span> 20 έθιμα</li>
+            <li class="pricing-feature"><span class="check">✓</span> Βασικός χάρτης</li>
+            <li class="pricing-feature"><span class="cross">✗</span> Premium φορεσιές</li>
+            <li class="pricing-feature"><span class="cross">✗</span> Downloads</li>
+            <li class="pricing-feature"><span class="cross">✗</span> Ebooks</li>
+          </ul>
+          <div class="pricing-cta">
+            <a href="login.html" class="btn btn-ghost" style="width:100%;justify-content:center">Εγγραφή Δωρεάν</a>
+          </div>
+        </div>
+
+        <!-- Explorer (Featured) -->
+        <div class="pricing-card featured">
+          <div class="pricing-body">
+            <div class="pricing-name">Explorer</div>
+            <p style="font-size:.85rem;color:var(--grey-400)">Για λάτρεις της παράδοσης</p>
+            <div class="pricing-price">
+              <span class="pricing-amount" id="explorer-price">€4.99</span>
+              <span class="pricing-period" id="explorer-period">/μήνα</span>
+            </div>
+            <ul class="pricing-features">
+              <li class="pricing-feature"><span class="check">✓</span> Απεριόριστες φορεσιές</li>
+              <li class="pricing-feature"><span class="check">✓</span> Όλα τα έθιμα</li>
+              <li class="pricing-feature"><span class="check">✓</span> Πλήρης χάρτης</li>
+              <li class="pricing-feature"><span class="check">✓</span> Downloads υλικού</li>
+              <li class="pricing-feature"><span class="check">✓</span> 3 συσκευές</li>
+              <li class="pricing-feature"><span class="cross">✗</span> Ebooks & Offline</li>
+            </ul>
+            <div class="pricing-cta">
+              <a href="login.html" class="btn btn-primary" style="width:100%;justify-content:center">Ξεκίνα Δωρεάν 7 Ημέρες</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Heritage Annual -->
+        <div class="pricing-card">
+          <div class="pricing-name">Heritage</div>
+          <p style="font-size:.85rem;color:var(--grey-400)">Για σοβαρή έρευνα</p>
+          <div class="pricing-price">
+            <span class="pricing-amount" id="heritage-price">€39.99</span>
+            <span class="pricing-period">/χρόνο</span>
+          </div>
+          <ul class="pricing-features">
+            <li class="pricing-feature"><span class="check">✓</span> Ό,τι στο Explorer</li>
+            <li class="pricing-feature"><span class="check">✓</span> Ebooks βιβλιοθήκη</li>
+            <li class="pricing-feature"><span class="check">✓</span> Offline πρόσβαση</li>
+            <li class="pricing-feature"><span class="check">✓</span> Αρχειακό υλικό</li>
+            <li class="pricing-feature"><span class="check">✓</span> 3 συσκευές</li>
+            <li class="pricing-feature"><span class="cross">✗</span> VIP events</li>
+          </ul>
+          <div class="pricing-cta">
+            <a href="login.html" class="btn btn-navy" style="width:100%;justify-content:center">Επίλεξε Heritage</a>
+          </div>
+        </div>
+
+        <!-- Lifetime -->
+        <div class="pricing-card">
+          <div class="pricing-name">Lifetime ✦</div>
+          <p style="font-size:.85rem;color:var(--grey-400)">Εφάπαξ, για πάντα</p>
+          <div class="pricing-price">
+            <span class="pricing-amount">€149</span>
+            <span class="pricing-period">εφάπαξ</span>
+          </div>
+          <ul class="pricing-features">
+            <li class="pricing-feature"><span class="check">✓</span> Ό,τι στο Heritage</li>
+            <li class="pricing-feature"><span class="check">✓</span> Μόνιμη πρόσβαση</li>
+            <li class="pricing-feature"><span class="check">✓</span> VIP events & προβολές</li>
+            <li class="pricing-feature"><span class="check">✓</span> Early access νέου υλικού</li>
+            <li class="pricing-feature"><span class="check">✓</span> 5 συσκευές</li>
+            <li class="pricing-feature"><span class="check">✓</span> Όλα τα μελλοντικά features</li>
+          </ul>
+          <div class="pricing-cta">
+            <a href="login.html" class="btn btn-ghost" style="width:100%;justify-content:center;border-color:var(--gold);color:var(--gold)">Αγορά Lifetime</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Institutional -->
+      <div style="background:var(--navy);color:white;border-radius:var(--radius-lg);padding:2.5rem 3rem;margin-top:3rem;display:flex;justify-content:space-between;align-items:center;gap:2rem;flex-wrap:wrap">
+        <div>
+          <div style="font-size:.78rem;color:#e8c85a;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:.5rem">Για Εκπαιδευτικά Ιδρύματα</div>
+          <h3 style="color:white;font-family:var(--font-serif);font-size:1.5rem;margin-bottom:.5rem">Εκπαιδευτικό Πακέτο</h3>
+          <p style="color:rgba(255,255,255,.75)">Έως 30 λογαριασμοί · Dashboard διαχείρισης · Lesson plans · Support<br>Σχολεία, πανεπιστήμια, πολιτιστικοί σύλλογοι</p>
+        </div>
+        <div style="text-align:center;flex-shrink:0">
+          <div style="font-family:var(--font-serif);font-size:2.5rem;color:#e8c85a;font-weight:700">€199<span style="font-size:1rem;color:rgba(255,255,255,.6)">/χρόνο</span></div>
+          <a href="mailto:info@hellasheritage.gr" class="btn btn-primary" style="margin-top:.75rem">Επικοινωνήστε μαζί μας</a>
+        </div>
+      </div>
+
+      <!-- FAQ -->
+      <div style="max-width:700px;margin:4rem auto 0">
+        <h2 style="text-align:center;color:var(--navy);margin-bottom:2rem">Συχνές Ερωτήσεις</h2>
+        <div id="faq-list"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="cta-banner">
+    <div class="container">
+      <h2>Δοκίμασε Δωρεάν 7 Ημέρες</h2>
+      <p>Χωρίς πιστωτική κάρτα. Ακύρωση οποτεδήποτε. Πλήρης πρόσβαση στο Explorer plan.</p>
+      <div class="cta-actions">
+        <a href="login.html" class="btn btn-primary btn-lg">Ξεκίνα Τώρα →</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+<div id="footer-placeholder"></div>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script>
+const faqs = [
+  { q: 'Μπορώ να ακυρώσω οποτεδήποτε;', a: 'Ναι, μπορείς να ακυρώσεις τη συνδρομή σου οποτεδήποτε χωρίς χρεώσεις ακύρωσης.' },
+  { q: 'Πώς λειτουργεί η δωρεάν δοκιμή;', a: '7 ημέρες πλήρης πρόσβαση στο Explorer plan χωρίς να χρειαστείς πιστωτική κάρτα. Μετά την περίοδο δοκιμής, επιλέγεις αν θέλεις να αναβαθμίσεις.' },
+  { q: 'Υπάρχει έκπτωση για φοιτητές;', a: 'Ναι! Με επαλήθευση φοιτητικής ταυτότητας, η πρόσβαση Explorer είναι €1.99/μήνα αντί €4.99.' },
+  { q: 'Τι περιλαμβάνει το εκπαιδευτικό πακέτο;', a: 'Έως 30 ξεχωριστοί λογαριασμοί, dashboard διαχείρισης για τον εκπαιδευτικό, lesson plans έτοιμα για χρήση και dedicated support.' },
+  { q: 'Σε ποιες γλώσσες είναι διαθέσιμο;', a: 'Το site είναι πλήρως διαθέσιμο στα Ελληνικά και Αγγλικά. Σύντομα προσθέτουμε Γερμανικά και Γαλλικά.' },
+];
+
+document.getElementById('faq-list').innerHTML = faqs.map((f, i) => `
+  <div style="border:1.5px solid var(--grey-200);border-radius:10px;margin-bottom:.75rem;overflow:hidden">
+    <button onclick="toggleFaq(${i})" style="width:100%;text-align:left;padding:1rem 1.25rem;background:white;border:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:.95rem;color:var(--navy)">
+      ${f.q} <span id="faq-icon-${i}">+</span>
+    </button>
+    <div id="faq-body-${i}" style="display:none;padding:0 1.25rem 1rem;font-size:.9rem;color:var(--text-light)">
+      ${f.a}
+    </div>
+  </div>`).join('');
+
+function toggleFaq(i) {
+  const body = document.getElementById('faq-body-' + i);
+  const icon = document.getElementById('faq-icon-' + i);
+  const open = body.style.display === 'block';
+  body.style.display = open ? 'none' : 'block';
+  icon.textContent  = open ? '+' : '−';
+}
+
+// Billing toggle
+let isAnnual = false;
+document.getElementById('billing-toggle').addEventListener('change', e => {
+  isAnnual = e.target.checked;
+  document.getElementById('toggle-dot').style.transform = isAnnual ? 'translateX(24px)' : 'translateX(0)';
+  document.getElementById('explorer-price').textContent = isAnnual ? '€3.33' : '€4.99';
+  document.getElementById('explorer-period').textContent = isAnnual ? '/μήνα (€39.99/χρόνο)' : '/μήνα';
+});
+</script>
+</body>
+</html>

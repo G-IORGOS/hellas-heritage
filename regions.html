@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Περιοχές — Hellas Heritage</title>
+  <meta name="description" content="Εξερεύνησε τις περιοχές της Ελλάδας — ήπειρος, νησιά, παραδόσεις ανά τόπο.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="navbar-placeholder" data-active="Περιοχές"></div>
+<div class="page-wrapper">
+
+  <div class="page-hero">
+    <div class="container">
+      <div class="breadcrumb"><a href="index.html">Αρχική</a> › Περιοχές</div>
+      <h1>Περιοχές της Ελλάδας</h1>
+      <p>Κάθε γωνιά της Ελλάδας κρύβει μοναδικές παραδόσεις, φορεσιές και έθιμα που διαμόρφωσαν τον ελληνικό πολιτισμό</p>
+    </div>
+  </div>
+
+  <section style="background:var(--cream)">
+    <div class="container">
+      <!-- Filters -->
+      <div class="filters-bar">
+        <div class="filter-group">
+          <span class="filter-label">Τύπος</span>
+          <select class="filter-select" id="filter-type">
+            <option value="">Όλες</option>
+            <option value="ηπειρος">Ήπειρος</option>
+            <option value="νησι">Νησί</option>
+          </select>
+        </div>
+        <div class="filter-search">
+          <span class="filter-label">Αναζήτηση</span>
+          <input type="text" id="search-input" placeholder="Αναζήτησε περιοχή...">
+        </div>
+        <div class="filter-count"><span id="count">0</span> περιοχές</div>
+      </div>
+
+      <div class="grid-3" id="regions-grid"></div>
+    </div>
+  </section>
+
+</div>
+<div id="footer-placeholder"></div>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script>
+let filtered = [...HH.regions];
+
+function render() {
+  const grid = document.getElementById('regions-grid');
+  document.getElementById('count').textContent = filtered.length;
+  if (!filtered.length) {
+    grid.innerHTML = '<div class="no-results"><h3>Δεν βρέθηκαν αποτελέσματα</h3><p>Δοκίμασε διαφορετικά φίλτρα</p></div>';
+    return;
+  }
+  grid.innerHTML = filtered.map(renderRegionCard).join('');
+}
+
+function applyFilters() {
+  const type   = document.getElementById('filter-type').value;
+  const search = document.getElementById('search-input').value.toLowerCase();
+  filtered = HH.regions.filter(r => {
+    if (type && r.type !== type) return false;
+    if (search && !r.name.toLowerCase().includes(search) && !r.description.toLowerCase().includes(search)) return false;
+    return true;
+  });
+  render();
+}
+
+document.getElementById('filter-type').addEventListener('change', applyFilters);
+document.getElementById('search-input').addEventListener('input', applyFilters);
+document.addEventListener('DOMContentLoaded', render);
+</script>
+</body>
+</html>

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hellas Heritage — Ανακάλυψε την Ψυχή της Ελλάδας</title>
+  <meta name="description" content="Premium ψηφιακή πλατφόρμα ελληνικής πολιτιστικής κληρονομιάς. Παραδοσιακές φορεσιές, έθιμα και παραδόσεις από κάθε γωνιά της Ελλάδας.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="navbar-placeholder" data-active=""></div>
+
+<div class="page-wrapper">
+
+  <!-- ── HERO ─────────────────────────────────────────────── -->
+  <section class="hero" id="home">
+    <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1555993539-1732b0258235?w=1600')"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-pattern"></div>
+    <div class="hero-content">
+      <div class="hero-badge">✦ Ψηφιακό Αρχείο Παράδοσης</div>
+      <h1>Η Ελλάδα<br><span>Ζωντανεύει</span></h1>
+      <p class="hero-sub">Φορεσιές, έθιμα και παραδόσεις από κάθε γωνιά της ελληνικής γης — ένα premium ψηφιακό ταξίδι στην πολιτιστική μας κληρονομιά.</p>
+      <div class="hero-actions">
+        <a href="regions.html" class="btn btn-primary btn-lg">🗺 Εξερεύνησε Περιοχές</a>
+        <a href="pricing.html" class="btn btn-outline btn-lg">✦ Premium Πρόσβαση</a>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><strong id="stat-costumes">0</strong><span>ΦΟΡΕΣΙΕΣ</span></div>
+      <div class="hero-stat"><strong id="stat-customs">0</strong><span>ΕΘΙΜΑ</span></div>
+      <div class="hero-stat"><strong id="stat-regions">0</strong><span>ΠΕΡΙΟΧΕΣ</span></div>
+    </div>
+  </section>
+
+  <!-- ── FEATURES ──────────────────────────────────────────── -->
+  <section style="background:var(--cream); padding:4rem 0">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-label">Γιατί Hellas Heritage</span>
+        <h2>Η Παράδοση σε Ψηφιακή Μορφή</h2>
+      </div>
+      <div class="grid-4">
+        <div class="feature-box">
+          <div class="feature-icon">👘</div>
+          <h3>Πλούσια Συλλογή</h3>
+          <p>Εκατοντάδες φορεσιές ανά περιοχή, φύλο και εποχή με αναλυτικές περιγραφές και gallery.</p>
+        </div>
+        <div class="feature-box">
+          <div class="feature-icon">🗺</div>
+          <h3>Διαδραστικός Χάρτης</h3>
+          <p>Εξερεύνησε την Ελλάδα περιοχή περιοχή — κλίκαρε οποιαδήποτε τοποθεσία και ανακάλυψε.</p>
+        </div>
+        <div class="feature-box">
+          <div class="feature-icon">🎭</div>
+          <h3>Ζωντανά Έθιμα</h3>
+          <p>Βίντεο, φωτογραφίες και αφηγήσεις για έθιμα που συνεχίζουν να τηρούνται σήμερα.</p>
+        </div>
+        <div class="feature-box">
+          <div class="feature-icon">📚</div>
+          <h3>Ακαδημαϊκή Πηγή</h3>
+          <p>Βιβλιογραφικές αναφορές, λαογραφικές μελέτες και εκπαιδευτικό υλικό για επαγγελματίες.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FEATURED REGIONS ──────────────────────────────────── -->
+  <section id="regions" style="background:white">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-label">Εξερεύνηση</span>
+        <h2>Δημοφιλείς Περιοχές</h2>
+        <p>Επίλεξε μια περιοχή για να δεις τις φορεσιές, τα έθιμα και τις παραδόσεις της</p>
+      </div>
+      <div class="grid-3" id="featured-regions"></div>
+      <div style="text-align:center;margin-top:2.5rem">
+        <a href="regions.html" class="btn btn-navy">Δες Όλες τις Περιοχές →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FEATURED COSTUMES ─────────────────────────────────── -->
+  <section id="costumes" style="background:var(--grey-100)">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-label">Συλλογή</span>
+        <h2>Επιλεγμένες Φορεσιές</h2>
+        <p>Από τη φουστανέλα του Τσολιά έως τη βράκα της Κρήτης — κάθε ένδυμα αφηγείται μια ιστορία</p>
+      </div>
+      <div class="grid-4" id="featured-costumes"></div>
+      <div style="text-align:center;margin-top:2.5rem">
+        <a href="costumes.html" class="btn btn-navy">Δες Όλες τις Φορεσιές →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FEATURED CUSTOMS ──────────────────────────────────── -->
+  <section id="customs" style="background:white">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-label">Παραδόσεις</span>
+        <h2>Ζωντανά Έθιμα</h2>
+        <p>Έθιμα που επιβιώνουν αιώνες — από τα Αναστενάρια έως τον κρητικό γάμο</p>
+      </div>
+      <div class="grid-3" id="featured-customs"></div>
+      <div style="text-align:center;margin-top:2.5rem">
+        <a href="customs.html" class="btn btn-navy">Δες Όλα τα Έθιμα →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── MAP ──────────────────────────────────────────────── -->
+  <section id="map" style="background:var(--grey-100)">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-label">Διαδραστικός Χάρτης</span>
+        <h2>Εξερεύνησε την Ελλάδα</h2>
+        <p>Κάνε κλικ σε οποιαδήποτε περιοχή για να δεις το πολιτιστικό της αρχείο</p>
+      </div>
+      <div class="map-placeholder" style="background:linear-gradient(135deg,#0f2347,#2a5298)">
+        <div>
+          <div style="font-size:4rem;margin-bottom:.5rem">🗺</div>
+          <div style="font-size:1.3rem;font-family:var(--font-serif)">Διαδραστικός Χάρτης</div>
+          <div style="font-size:.9rem;opacity:.7;margin-top:.3rem">Επιλέξτε περιοχή για εξερεύνηση</div>
+          <div style="margin-top:1.5rem;display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap" id="map-region-btns"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── EVENTS ────────────────────────────────────────────── -->
+  <section id="events" style="background:white">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-label">Ημερολόγιο</span>
+        <h2>Επερχόμενες Εκδηλώσεις</h2>
+      </div>
+      <div class="grid-4" id="events-grid"></div>
+    </div>
+  </section>
+
+  <!-- ── 3D FEATURE ───────────────────────────────────────── -->
+  <section style="background:var(--grey-100)">
+    <div class="container">
+      <div class="feature-3d-card">
+        <div class="feature-3d-visual">🧊</div>
+        <div>
+          <div style="font-size:.78rem;color:rgba(184,134,11,.8);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:.5rem">Νέο Feature</div>
+          <h3>3D Viewer Φορεσιών</h3>
+          <p>Εξερεύνησε κάθε κομμάτι της φορεσιάς σε τρεις διαστάσεις. Διαχωρισμός κομματιών, interactive ετικέτες, και δυνατότητα upload δικών σου 3D μοντέλων σε μορφή GLB/GLTF.</p>
+          <a href="viewer-3d.html" class="btn btn-primary btn-sm">Δοκίμασε τον 3D Viewer →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CTA ──────────────────────────────────────────────── -->
+  <div class="cta-banner">
+    <div class="container">
+      <h2>Ξεκλείδωσε Όλο το Αρχείο</h2>
+      <p>Αποκτήστε premium πρόσβαση σε εκατοντάδες σπάνιες φορεσιές, βίντεο εθίμων, 3D viewer και εκπαιδευτικό υλικό.</p>
+      <div class="cta-actions">
+        <a href="pricing.html" class="btn btn-primary btn-lg">Δες τα Πακέτα</a>
+        <a href="login.html" class="btn btn-outline btn-lg">Δωρεάν Εγγραφή</a>
+      </div>
+    </div>
+  </div>
+
+</div><!-- page-wrapper -->
+
+<div id="footer-placeholder"></div>
+<div id="toast"></div>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Animate stats counter
+  function animateCount(el, target, suffix='') {
+    let n = 0, step = Math.ceil(target / 40);
+    const t = setInterval(() => {
+      n = Math.min(n + step, target);
+      el.textContent = n + suffix;
+      if (n >= target) clearInterval(t);
+    }, 40);
+  }
+  animateCount(document.getElementById('stat-costumes'), HH.costumes.length, '+');
+  animateCount(document.getElementById('stat-customs'),  HH.customs.length,  '+');
+  animateCount(document.getElementById('stat-regions'),  HH.regions.length,  '');
+
+  // Featured regions (first 3 featured)
+  const featuredRegions = HH.regions.filter(r => r.featured).slice(0, 3);
+  document.getElementById('featured-regions').innerHTML = featuredRegions.map(renderRegionCard).join('');
+
+  // Featured costumes (first 4 featured)
+  const featuredCostumes = HH.costumes.filter(c => c.featured).slice(0, 4);
+  document.getElementById('featured-costumes').innerHTML = featuredCostumes.map(renderCostumeCard).join('');
+
+  // Featured customs
+  const featuredCustoms = HH.customs.filter(c => c.featured).slice(0, 3);
+  document.getElementById('featured-customs').innerHTML = featuredCustoms.map(renderCustomCard).join('');
+
+  // Map region buttons
+  document.getElementById('map-region-btns').innerHTML = HH.regions.slice(0,6).map(r =>
+    `<a href="region.html?id=${r.id}" style="padding:.35rem .9rem;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:50px;color:white;font-size:.82rem;transition:.2s" onmouseover="this.style.background='rgba(184,134,11,.4)'" onmouseout="this.style.background='rgba(255,255,255,.15)'">${r.name}</a>`
+  ).join('');
+
+  // Events grid
+  document.getElementById('events-grid').innerHTML = HH.events.map(e => `
+    <div class="card">
+      <div class="card-image">
+        <img src="${e.image}" alt="${e.name}" loading="lazy">
+        <div class="card-badge gold">${e.type}</div>
+      </div>
+      <div class="card-body">
+        <div class="card-meta">📅 ${e.date}</div>
+        <h3 class="card-title">${e.name}</h3>
+        <p class="card-desc">${e.description}</p>
+      </div>
+      <div class="card-footer">
+        <span class="card-footer-tag">📍 ${e.location}</span>
+        ${e.website && e.website !== '#' ? `<a href="${e.website}" target="_blank" style="font-size:.82rem;color:var(--navy)">Πληροφορίες →</a>` : ''}
+      </div>
+    </div>`).join('');
+});
+</script>
+</body>
+</html>
