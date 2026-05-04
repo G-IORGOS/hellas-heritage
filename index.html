@@ -3,137 +3,215 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hellas Heritage — Ανακάλυψε την Ψυχή της Ελλάδας</title>
-  <meta name="description" content="Premium ψηφιακή πλατφόρμα ελληνικής πολιτιστικής κληρονομιάς. Παραδοσιακές φορεσιές, έθιμα και παραδόσεις από κάθε γωνιά της Ελλάδας.">
+  <title>Hellas Heritage — Ψηφιακό Αρχείο Ελληνικής Παράδοσης</title>
+  <meta name="description" content="Premium ψηφιακή πλατφόρμα ελληνικής πολιτιστικής κληρονομιάς. Παραδοσιακές φορεσιές, έθιμα και παραδόσεις από κάθε γωνιά της Ελλάδας με πηγές, βιβλιογραφία και 3D viewer.">
+  <meta name="keywords" content="ελληνικές παραδοσιακές φορεσιές, έθιμα, ελληνική παράδοση, λαογραφία, κληρονομιά, Greek traditional costumes">
+  <meta property="og:title" content="Hellas Heritage — Η Ψυχή της Ελλάδας">
+  <meta property="og:description" content="Φορεσιές, έθιμα και παραδόσεις από κάθε γωνιά της ελληνικής γης — premium ψηφιακό αρχείο πολιτιστικής κληρονομιάς.">
+  <meta property="og:image" content="https://images.unsplash.com/photo-1555993539-1732b0258235?w=1200">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="el_GR">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Hellas Heritage","description":"Ψηφιακό αρχείο ελληνικής πολιτιστικής κληρονομιάς"}</script>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-
 <div id="navbar-placeholder" data-active=""></div>
+<div class="page-wrapper" style="padding-top:0">
 
-<div class="page-wrapper">
-
-  <!-- ── HERO ─────────────────────────────────────────────── -->
-  <section class="hero" id="home">
-    <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1555993539-1732b0258235?w=1600')"></div>
+  <!-- HERO -->
+  <section class="hero" style="padding:0">
+    <div class="hero-slides" id="hero-slides">
+      <div class="hero-slide active" style="background-image:url('https://images.unsplash.com/photo-1555993539-1732b0258235?w=1600&q=85')"></div>
+      <div class="hero-slide" style="background-image:url('https://images.unsplash.com/photo-1601581875309-fafbf2d3ed3a?w=1600&q=85')"></div>
+      <div class="hero-slide" style="background-image:url('https://images.unsplash.com/photo-1568454537842-d933259bb258?w=1600&q=85')"></div>
+      <div class="hero-slide" style="background-image:url('https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=1600&q=85')"></div>
+    </div>
     <div class="hero-overlay"></div>
-    <div class="hero-pattern"></div>
+    <div class="hero-counter" id="hero-counter"><strong>01</strong> / 04</div>
     <div class="hero-content">
-      <div class="hero-badge">✦ Ψηφιακό Αρχείο Παράδοσης</div>
-      <h1>Η Ελλάδα<br><span>Ζωντανεύει</span></h1>
-      <p class="hero-sub">Φορεσιές, έθιμα και παραδόσεις από κάθε γωνιά της ελληνικής γης — ένα premium ψηφιακό ταξίδι στην πολιτιστική μας κληρονομιά.</p>
+      <div class="hero-eyebrow">Ψηφιακό Αρχείο Παράδοσης</div>
+      <h1>Η Ελλάδα που<br><em>Δεν Ξεχνάμε</em></h1>
+      <p class="hero-sub">Φορεσιές, έθιμα και παραδόσεις από κάθε γωνιά της ελληνικής γης — τεκμηριωμένα, διαδραστικά, ζωντανά.</p>
       <div class="hero-actions">
-        <a href="regions.html" class="btn btn-primary btn-lg">🗺 Εξερεύνησε Περιοχές</a>
-        <a href="pricing.html" class="btn btn-outline btn-lg">✦ Premium Πρόσβαση</a>
+        <a href="regions.html" class="btn btn-primary btn-lg">Εξερεύνησε Περιοχές</a>
+        <a href="costumes.html" class="btn btn-outline btn-lg">Βλέπε Φορεσιές</a>
       </div>
     </div>
-    <div class="hero-stats">
-      <div class="hero-stat"><strong id="stat-costumes">0</strong><span>ΦΟΡΕΣΙΕΣ</span></div>
-      <div class="hero-stat"><strong id="stat-customs">0</strong><span>ΕΘΙΜΑ</span></div>
-      <div class="hero-stat"><strong id="stat-regions">0</strong><span>ΠΕΡΙΟΧΕΣ</span></div>
+    <div class="hero-scroll">Scroll</div>
+    <div class="hero-dots" id="hero-dots"></div>
+    <span id="stat-costumes" style="display:none">0</span>
+    <span id="stat-customs"  style="display:none">0</span>
+    <span id="stat-regions"  style="display:none">0</span>
+  </section>
+
+  <!-- TRUST BAR -->
+  <div style="background:var(--cream-warm);border-bottom:1px solid var(--grey-200)">
+    <div class="container">
+      <div style="display:flex;align-items:center;justify-content:center;gap:3rem;padding:1.25rem 0;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;color:var(--grey-600)"><span style="color:var(--gold)">📚</span> Τεκμηριωμένες πηγές & βιβλιογραφία</div>
+        <div style="width:1px;height:18px;background:var(--grey-300)"></div>
+        <div style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;color:var(--grey-600)"><span style="color:var(--gold)">🏛</span> Συνεργασία με λαογραφικά ιδρύματα</div>
+        <div style="width:1px;height:18px;background:var(--grey-300)"></div>
+        <div style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;color:var(--grey-600)"><span style="color:var(--gold)">🧊</span> 3D models ανδρικές · γυναικείες · παιδικές</div>
+        <div style="width:1px;height:18px;background:var(--grey-300)"></div>
+        <div style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;color:var(--grey-600)"><span style="color:var(--gold)">🌍</span> Ελληνικά & Αγγλικά</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STORY -->
+  <section style="background:var(--cream-warm)">
+    <div class="container">
+      <div style="max-width:800px;margin:0 auto;text-align:center" class="reveal">
+        <span class="section-label">Η Αποστολή μας</span>
+        <h2 style="margin-bottom:1.25rem">Η Παράδοση δεν ξεχνιέται —<br><em style="color:var(--gold)">τεκμηριώνεται</em></h2>
+        <p style="font-size:1.08rem;line-height:1.85;margin-bottom:1.25rem">Το Hellas Heritage είναι η πρώτη premium ψηφιακή πλατφόρμα που αρχειοθετεί την ελληνική ενδυματολογική και λαογραφική κληρονομιά με επιστημονική αυστηρότητα και σύγχρονη τεχνολογία.</p>
+        <p style="font-size:1.08rem;line-height:1.85;margin-bottom:2.5rem">Κάθε φορεσιά συνοδεύεται από βιβλιογραφικές αναφορές, φωτογραφικά credits, curator notes και ένδειξη αξιοπιστίας. Κάθε έθιμο έχει γεωγραφική εντόπιση και ιστορικό πλαίσιο.</p>
+        <div style="display:flex;justify-content:center;gap:4rem;padding:2rem 0;border-top:1px solid var(--grey-200);border-bottom:1px solid var(--grey-200);margin-bottom:2rem">
+          <div style="text-align:center">
+            <strong id="story-stat-c" style="display:block;font-family:var(--font-serif);font-size:2.5rem;font-weight:900;color:var(--navy);line-height:1">150+</strong>
+            <span style="font-size:.75rem;color:var(--grey-400);text-transform:uppercase;letter-spacing:1.2px">Φορεσιές</span>
+          </div>
+          <div style="text-align:center">
+            <strong id="story-stat-cu" style="display:block;font-family:var(--font-serif);font-size:2.5rem;font-weight:900;color:var(--navy);line-height:1">80+</strong>
+            <span style="font-size:.75rem;color:var(--grey-400);text-transform:uppercase;letter-spacing:1.2px">Έθιμα</span>
+          </div>
+          <div style="text-align:center">
+            <strong style="display:block;font-family:var(--font-serif);font-size:2.5rem;font-weight:900;color:var(--navy);line-height:1">20+</strong>
+            <span style="font-size:.75rem;color:var(--grey-400);text-transform:uppercase;letter-spacing:1.2px">Περιοχές</span>
+          </div>
+        </div>
+        <a href="regions.html" class="btn btn-navy">Εξερεύνησε το Αρχείο →</a>
+      </div>
     </div>
   </section>
 
-  <!-- ── FEATURES ──────────────────────────────────────────── -->
-  <section style="background:var(--cream); padding:4rem 0">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-label">Γιατί Hellas Heritage</span>
-        <h2>Η Παράδοση σε Ψηφιακή Μορφή</h2>
-      </div>
-      <div class="grid-4">
-        <div class="feature-box">
-          <div class="feature-icon">👘</div>
-          <h3>Πλούσια Συλλογή</h3>
-          <p>Εκατοντάδες φορεσιές ανά περιοχή, φύλο και εποχή με αναλυτικές περιγραφές και gallery.</p>
-        </div>
-        <div class="feature-box">
-          <div class="feature-icon">🗺</div>
-          <h3>Διαδραστικός Χάρτης</h3>
-          <p>Εξερεύνησε την Ελλάδα περιοχή περιοχή — κλίκαρε οποιαδήποτε τοποθεσία και ανακάλυψε.</p>
-        </div>
-        <div class="feature-box">
-          <div class="feature-icon">🎭</div>
-          <h3>Ζωντανά Έθιμα</h3>
-          <p>Βίντεο, φωτογραφίες και αφηγήσεις για έθιμα που συνεχίζουν να τηρούνται σήμερα.</p>
-        </div>
-        <div class="feature-box">
-          <div class="feature-icon">📚</div>
-          <h3>Ακαδημαϊκή Πηγή</h3>
-          <p>Βιβλιογραφικές αναφορές, λαογραφικές μελέτες και εκπαιδευτικό υλικό για επαγγελματίες.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── FEATURED REGIONS ──────────────────────────────────── -->
-  <section id="regions" style="background:white">
-    <div class="container">
-      <div class="section-header">
+  <!-- FEATURED REGIONS -->
+  <section style="background:var(--grey-50)">
+    <div class="container-wide">
+      <div class="section-header reveal">
         <span class="section-label">Εξερεύνηση</span>
         <h2>Δημοφιλείς Περιοχές</h2>
         <p>Επίλεξε μια περιοχή για να δεις τις φορεσιές, τα έθιμα και τις παραδόσεις της</p>
       </div>
-      <div class="grid-3" id="featured-regions"></div>
-      <div style="text-align:center;margin-top:2.5rem">
+      <div class="editorial-grid-3" id="featured-regions"></div>
+      <div style="text-align:center;margin-top:2.75rem" class="reveal">
         <a href="regions.html" class="btn btn-navy">Δες Όλες τις Περιοχές →</a>
       </div>
     </div>
   </section>
 
-  <!-- ── FEATURED COSTUMES ─────────────────────────────────── -->
-  <section id="costumes" style="background:var(--grey-100)">
+  <!-- FEATURED COSTUMES — horizontal scroll -->
+  <section style="background:var(--white)" class="h-scroll-section">
     <div class="container">
-      <div class="section-header">
+      <div class="section-header reveal">
         <span class="section-label">Συλλογή</span>
         <h2>Επιλεγμένες Φορεσιές</h2>
         <p>Από τη φουστανέλα του Τσολιά έως τη βράκα της Κρήτης — κάθε ένδυμα αφηγείται μια ιστορία</p>
       </div>
-      <div class="grid-4" id="featured-costumes"></div>
-      <div style="text-align:center;margin-top:2.5rem">
-        <a href="costumes.html" class="btn btn-navy">Δες Όλες τις Φορεσιές →</a>
-      </div>
+    </div>
+    <div class="h-scroll-wrap" id="featured-costumes"></div>
+    <div style="text-align:center;padding-bottom:1rem" class="reveal">
+      <a href="costumes.html" class="btn btn-ghost">Δες Όλες τις Φορεσιές →</a>
     </div>
   </section>
 
-  <!-- ── FEATURED CUSTOMS ──────────────────────────────────── -->
-  <section id="customs" style="background:white">
+  <!-- CREDIBILITY FEATURES -->
+  <section style="background:var(--cream-warm)">
     <div class="container">
-      <div class="section-header">
-        <span class="section-label">Παραδόσεις</span>
-        <h2>Ζωντανά Έθιμα</h2>
-        <p>Έθιμα που επιβιώνουν αιώνες — από τα Αναστενάρια έως τον κρητικό γάμο</p>
+      <div class="section-header reveal">
+        <span class="section-label">Αξιοπιστία</span>
+        <h2>Επιστημονική Τεκμηρίωση</h2>
+        <p>Κάθε καταχώρηση επαληθευμένη από ειδικούς λαογραφίας και ιστορίας ενδυμασίας</p>
       </div>
-      <div class="grid-3" id="featured-customs"></div>
-      <div style="text-align:center;margin-top:2.5rem">
-        <a href="customs.html" class="btn btn-navy">Δες Όλα τα Έθιμα →</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── MAP ──────────────────────────────────────────────── -->
-  <section id="map" style="background:var(--grey-100)">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-label">Διαδραστικός Χάρτης</span>
-        <h2>Εξερεύνησε την Ελλάδα</h2>
-        <p>Κάνε κλικ σε οποιαδήποτε περιοχή για να δεις το πολιτιστικό της αρχείο</p>
-      </div>
-      <div class="map-placeholder" style="background:linear-gradient(135deg,#0f2347,#2a5298)">
-        <div>
-          <div style="font-size:4rem;margin-bottom:.5rem">🗺</div>
-          <div style="font-size:1.3rem;font-family:var(--font-serif)">Διαδραστικός Χάρτης</div>
-          <div style="font-size:.9rem;opacity:.7;margin-top:.3rem">Επιλέξτε περιοχή για εξερεύνηση</div>
-          <div style="margin-top:1.5rem;display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap" id="map-region-btns"></div>
+      <div class="grid-4">
+        <div class="feature-box reveal reveal-delay-1">
+          <div class="feature-num">01</div>
+          <h3>Βιβλιογραφία</h3>
+          <p>Κάθε φορεσιά συνοδεύεται από επιστημονικές αναφορές, λαογραφικές μελέτες και αρχειακές πηγές.</p>
+        </div>
+        <div class="feature-box reveal reveal-delay-2">
+          <div class="feature-num">02</div>
+          <h3>Curator Notes</h3>
+          <p>Σχόλια ειδικών με αναλυτική ερμηνεία του ιστορικού, κοινωνικού και συμβολικού πλαισίου.</p>
+        </div>
+        <div class="feature-box reveal reveal-delay-3">
+          <div class="feature-num">03</div>
+          <h3>Photo Credits</h3>
+          <p>Κάθε εικόνα με attribution, licensing και αναφορά στο αρχείο ή τον φωτογράφο.</p>
+        </div>
+        <div class="feature-box reveal reveal-delay-4">
+          <div class="feature-num">04</div>
+          <h3>Αξιοπιστία ✦✦✦✦✦</h3>
+          <p>Σύστημα αστεριών που δείχνει το επίπεδο τεκμηρίωσης κάθε καταχώρησης (1–5).</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ── EVENTS ────────────────────────────────────────────── -->
-  <section id="events" style="background:white">
+  <!-- FEATURED CUSTOMS -->
+  <section style="background:var(--white)">
     <div class="container">
-      <div class="section-header">
+      <div class="section-header reveal">
+        <span class="section-label">Παραδόσεις</span>
+        <h2>Ζωντανά Έθιμα</h2>
+        <p>Έθιμα που επιβιώνουν αιώνες — από τα Αναστενάρια έως τον κρητικό γάμο</p>
+      </div>
+      <div class="editorial-grid" id="featured-customs"></div>
+      <div style="text-align:center;margin-top:2.75rem" class="reveal">
+        <a href="customs.html" class="btn btn-navy">Δες Όλα τα Έθιμα →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3D VIEWER FEATURE -->
+  <section style="background:var(--grey-50)">
+    <div class="container">
+      <div class="feature-3d-card reveal">
+        <div class="feature-3d-visual">
+          <span style="font-family:var(--font-serif);font-size:3rem;font-weight:900;color:#e8c85a;letter-spacing:-2px">3D</span>
+        </div>
+        <div>
+          <div style="font-size:.72rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:.5rem">Διαδραστική Εμπειρία</div>
+          <h3>3D Viewer Φορεσιών</h3>
+          <p>Εξερεύνησε κάθε κομμάτι σε τρεις διαστάσεις με annotations, hotspots και AR-ready mobile view. Ξεχωριστά ανδρικά, γυναικεία και παιδικά μοντέλα.</p>
+          <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:1.35rem">
+            <a href="viewer-3d.html" class="btn btn-primary btn-sm">🧊 Δοκίμασε τον 3D Viewer</a>
+            <a href="pricing.html" class="btn btn-sm" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:white">Δες Premium →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAP -->
+  <section style="background:var(--white)">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-label">Διαδραστικός Χάρτης</span>
+        <h2>Εξερεύνησε την Ελλάδα</h2>
+        <p>Βρες πολιτιστικά δεδομένα ανά περιοχή — φορεσιές, έθιμα, εκδηλώσεις, clusters</p>
+      </div>
+      <div class="reveal" style="text-align:center;margin-bottom:2rem">
+        <a href="map.html" class="btn btn-navy btn-lg">🗺 Άνοιξε τον Χάρτη</a>
+      </div>
+      <div class="reveal" style="border-radius:var(--radius-xl);overflow:hidden;height:340px;background:linear-gradient(135deg,#0f2347,#1a4a8a);display:flex;align-items:center;justify-content:center;position:relative;box-shadow:var(--shadow-xl)">
+        <div style="position:absolute;inset:0;background-image:url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=70');background-size:cover;background-position:center;opacity:.2"></div>
+        <div style="position:relative;z-index:1;text-align:center;color:white">
+          <div style="font-size:3.5rem;margin-bottom:.5rem">🗺</div>
+          <div style="font-family:var(--font-serif);font-size:1.3rem;color:white;margin-bottom:.4rem">Διαδραστικός Χάρτης Ελλάδας</div>
+          <div style="color:rgba(255,255,255,.6);font-size:.85rem">Leaflet · Regions · Clusters · Φίλτρα</div>
+          <div id="map-region-btns" style="display:flex;gap:.55rem;justify-content:center;flex-wrap:wrap;margin-top:1.5rem"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EVENTS -->
+  <section style="background:var(--grey-50)">
+    <div class="container">
+      <div class="section-header reveal">
         <span class="section-label">Ημερολόγιο</span>
         <h2>Επερχόμενες Εκδηλώσεις</h2>
       </div>
@@ -141,26 +219,61 @@
     </div>
   </section>
 
-  <!-- ── 3D FEATURE ───────────────────────────────────────── -->
-  <section style="background:var(--grey-100)">
+  <!-- PREMIUM PRICING PREVIEW -->
+  <section style="background:var(--white)">
     <div class="container">
-      <div class="feature-3d-card">
-        <div class="feature-3d-visual">🧊</div>
-        <div>
-          <div style="font-size:.78rem;color:rgba(184,134,11,.8);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:.5rem">Νέο Feature</div>
-          <h3>3D Viewer Φορεσιών</h3>
-          <p>Εξερεύνησε κάθε κομμάτι της φορεσιάς σε τρεις διαστάσεις. Διαχωρισμός κομματιών, interactive ετικέτες, και δυνατότητα upload δικών σου 3D μοντέλων σε μορφή GLB/GLTF.</p>
-          <a href="viewer-3d.html" class="btn btn-primary btn-sm">Δοκίμασε τον 3D Viewer →</a>
+      <div class="section-header reveal">
+        <span class="section-label">Συνδρομές</span>
+        <h2>Επίλεξε το Πλάνο σου</h2>
+        <p>Δωρεάν περιήγηση για όλους — premium πρόσβαση για ερευνητές και εκπαιδευτικούς</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;max-width:960px;margin:0 auto">
+        <div class="reveal reveal-delay-1" style="border:2px solid var(--grey-200);border-radius:var(--radius-lg);padding:2rem;background:white">
+          <div style="font-size:.75rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--grey-400);margin-bottom:.75rem">Ελεύθερο</div>
+          <div style="font-family:var(--font-serif);font-size:2.5rem;font-weight:900;color:var(--navy);line-height:1">€0</div>
+          <div style="font-size:.82rem;color:var(--grey-400);margin-bottom:1.5rem">για πάντα</div>
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:.6rem;margin-bottom:2rem">
+            <li style="font-size:.875rem;display:flex;gap:.5rem"><span style="color:var(--gold);font-weight:700">✓</span>Περιήγηση φορεσιών & εθίμων</li>
+            <li style="font-size:.875rem;display:flex;gap:.5rem"><span style="color:var(--gold);font-weight:700">✓</span>Διαδραστικός χάρτης</li>
+            <li style="font-size:.875rem;display:flex;gap:.5rem"><span style="color:var(--gold);font-weight:700">✓</span>Βασική βιβλιογραφία</li>
+          </ul>
+          <a href="login.html" class="btn btn-ghost" style="width:100%;justify-content:center">Εγγραφή</a>
+        </div>
+        <div class="reveal reveal-delay-2" style="border:2px solid var(--gold);border-radius:var(--radius-lg);padding:2rem;background:linear-gradient(160deg,var(--navy-dark),var(--navy-mid));transform:scale(1.04);box-shadow:var(--shadow-xl);position:relative">
+          <div style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--gold);color:white;font-size:.7rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:.3rem 1.1rem;border-radius:50px">Δημοφιλές</div>
+          <div style="font-size:.75rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:.75rem">Κληρονόμος</div>
+          <div style="font-family:var(--font-serif);font-size:2.5rem;font-weight:900;color:var(--gold);line-height:1">€4.99</div>
+          <div style="font-size:.82rem;color:rgba(255,255,255,.5);margin-bottom:1.5rem">/ μήνα</div>
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:.6rem;margin-bottom:2rem">
+            <li style="font-size:.875rem;color:white;display:flex;gap:.5rem"><span style="color:var(--gold);font-weight:700">✓</span>Όλα τα Free</li>
+            <li style="font-size:.875rem;color:white;display:flex;gap:.5rem"><span style="color:var(--gold);font-weight:700">✓</span>3D Viewer & AR</li>
+            <li style="font-size:.875rem;color:white;display:flex;gap:.5rem"><span style="color:var(--gold);font-weight:700">✓</span>Downloadable PDFs</li>
+            <li style="font-size:.875rem;color:white;display:flex;gap:.5rem"><span style="color:var(--gold);font-weight:700">✓</span>Πλήρης βιβλιογραφία</li>
+            <li style="font-size:.875rem;color:white;display:flex;gap:.5rem"><span style="color:var(--gold);font-weight:700">✓</span>Αποθήκευση αγαπημένων</li>
+          </ul>
+          <a href="pricing.html" class="btn btn-primary" style="width:100%;justify-content:center">Ξεκίνα Δωρεάν</a>
+        </div>
+        <div class="reveal reveal-delay-3" style="border:2px solid var(--grey-200);border-radius:var(--radius-lg);padding:2rem;background:white">
+          <div style="font-size:.75rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--grey-400);margin-bottom:.75rem">Εκπαιδευτικό</div>
+          <div style="font-family:var(--font-serif);font-size:2.5rem;font-weight:900;color:var(--navy);line-height:1">€9.99</div>
+          <div style="font-size:.82rem;color:var(--grey-400);margin-bottom:1.5rem">/ μήνα</div>
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:.6rem;margin-bottom:2rem">
+            <li style="font-size:.875rem;display:flex;gap:.5rem"><span style="color:var(--gold);font-weight:700">✓</span>Όλα τα Κληρονόμος</li>
+            <li style="font-size:.875rem;display:flex;gap:.5rem"><span style="color:var(--gold);font-weight:700">✓</span>Teacher accounts ×5</li>
+            <li style="font-size:.875rem;display:flex;gap:.5rem"><span style="color:var(--gold);font-weight:700">✓</span>Educational packs</li>
+            <li style="font-size:.875rem;display:flex;gap:.5rem"><span style="color:var(--gold);font-weight:700">✓</span>API πρόσβαση</li>
+          </ul>
+          <a href="pricing.html" class="btn btn-ghost" style="width:100%;justify-content:center">Μάθε Περισσότερα</a>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ── CTA ──────────────────────────────────────────────── -->
+  <!-- CTA -->
   <div class="cta-banner">
     <div class="container">
-      <h2>Ξεκλείδωσε Όλο το Αρχείο</h2>
-      <p>Αποκτήστε premium πρόσβαση σε εκατοντάδες σπάνιες φορεσιές, βίντεο εθίμων, 3D viewer και εκπαιδευτικό υλικό.</p>
+      <h2>Ξεκλείδωσε Όλη<br><em>την Παράδοση</em></h2>
+      <p>Πλήρης πρόσβαση σε εκατοντάδες σπάνιες φορεσιές, βίντεο εθίμων, 3D viewer, βιβλιογραφία και εκπαιδευτικό υλικό.</p>
       <div class="cta-actions">
         <a href="pricing.html" class="btn btn-primary btn-lg">Δες τα Πακέτα</a>
         <a href="login.html" class="btn btn-outline btn-lg">Δωρεάν Εγγραφή</a>
@@ -168,64 +281,116 @@
     </div>
   </div>
 
-</div><!-- page-wrapper -->
-
+</div>
 <div id="footer-placeholder"></div>
 <div id="toast"></div>
-
 <script src="js/data.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="js/supabase.js"></script>
 <script src="js/app.js"></script>
 <script>
-window.__HH_READY.then(() => {
-  // Animate stats counter
-  function animateCount(el, target, suffix='') {
-    let n = 0, step = Math.ceil(target / 40);
-    const t = setInterval(() => {
-      n = Math.min(n + step, target);
-      el.textContent = n + suffix;
-      if (n >= target) clearInterval(t);
-    }, 40);
+// Hero slideshow
+(function(){
+  const slides = document.querySelectorAll('.hero-slide');
+  const dotsWrap = document.getElementById('hero-dots');
+  const counter = document.getElementById('hero-counter');
+  let cur = 0;
+  slides.forEach((_,i) => {
+    const d = document.createElement('button');
+    d.className = 'hero-dot'+(i===0?' active':'');
+    d.onclick = () => go(i);
+    dotsWrap.appendChild(d);
+  });
+  function go(n){
+    slides[cur].classList.remove('active');
+    document.querySelectorAll('.hero-dot')[cur].classList.remove('active');
+    cur = n;
+    slides[cur].classList.add('active');
+    document.querySelectorAll('.hero-dot')[cur].classList.add('active');
+    if(counter) counter.innerHTML = '<strong>'+String(cur+1).padStart(2,'0')+'</strong> / '+String(slides.length).padStart(2,'0');
   }
-  animateCount(document.getElementById('stat-costumes'), HH.costumes.length, '+');
-  animateCount(document.getElementById('stat-customs'),  HH.customs.length,  '+');
-  animateCount(document.getElementById('stat-regions'),  HH.regions.length,  '');
+  setInterval(() => go((cur+1)%slides.length), 5500);
+})();
 
-  // Featured regions (first 3 featured)
-  const featuredRegions = HH.regions.filter(r => r.featured).slice(0, 3);
-  document.getElementById('featured-regions').innerHTML = featuredRegions.map(renderRegionCard).join('');
+// Navbar scroll
+window.addEventListener('scroll', () => {
+  document.querySelector('.navbar').classList.toggle('scrolled', window.scrollY > 40);
+}, {passive:true});
 
-  // Featured costumes (first 4 featured)
-  const featuredCostumes = HH.costumes.filter(c => c.featured).slice(0, 4);
-  document.getElementById('featured-costumes').innerHTML = featuredCostumes.map(renderCostumeCard).join('');
+// Scroll reveal
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('visible'); io.unobserve(e.target); } });
+}, {threshold:0.12});
+document.querySelectorAll('.reveal,.reveal-left').forEach(el => io.observe(el));
 
-  // Featured customs
-  const featuredCustoms = HH.customs.filter(c => c.featured).slice(0, 3);
-  document.getElementById('featured-customs').innerHTML = featuredCustoms.map(renderCustomCard).join('');
+// Data
+window.__HH_READY.then(() => {
+  function countUp(el,t,s=''){let n=0,step=Math.ceil(t/40);const iv=setInterval(()=>{n=Math.min(n+step,t);el.textContent=n+s;if(n>=t)clearInterval(iv);},40);}
+  countUp(document.getElementById('stat-costumes'), HH.costumes.length, '+');
+  countUp(document.getElementById('stat-customs'),  HH.customs.length,  '+');
+  countUp(document.getElementById('stat-regions'),  HH.regions.length,  '');
+  const sc = document.getElementById('story-stat-c');
+  const scu = document.getElementById('story-stat-cu');
+  if(sc) sc.textContent = HH.costumes.length+'+';
+  if(scu) scu.textContent = HH.customs.length+'+';
+
+  // Featured regions — editorial overlay cards
+  const fr = HH.regions.filter(r=>r.featured).slice(0,3);
+  document.getElementById('featured-regions').innerHTML = fr.length
+    ? fr.map((r,i)=>`
+      <a class="card-overlay reveal${i>0?' reveal-delay-'+i:''}" href="region.html?id=${r.id}">
+        <div class="card-image"><img src="${r.image}" alt="${r.name}" loading="lazy"></div>
+        <div class="card-overlay-body">
+          <div class="card-overlay-region">${regionTypeBadge(r.type)} · ${r.costumesCount} φορεσιές</div>
+          <div class="card-overlay-title">${r.name}</div>
+          <div class="card-overlay-sub">${r.nameEn} — ${r.customsCount} έθιμα</div>
+        </div>
+      </a>`).join('')
+    : '';
+
+  // Horizontal costumes
+  const fc = HH.costumes.filter(c=>c.featured).slice(0,8);
+  document.getElementById('featured-costumes').innerHTML = fc.map(c=>`
+    <a class="h-scroll-card" href="costume.html?id=${c.id}">
+      <div class="card-image"><img src="${c.image}" alt="${c.name}" loading="lazy">
+        ${c.isPremium?'<div class="card-badge premium" style="position:absolute;top:.8rem;right:.8rem;left:auto">✦ Premium</div>':''}
+      </div>
+      <div class="h-scroll-body"><h4>${c.name}</h4><p>${genderLabel(c.gender)} · ${regionName(c.regionId)}</p></div>
+    </a>`).join('');
+
+  // Featured customs — 2-col editorial
+  const fcu = HH.customs.filter(c=>c.featured).slice(0,2);
+  document.getElementById('featured-customs').innerHTML = fcu.map((cu,i)=>`
+    <a class="card-overlay reveal${i>0?' reveal-delay-2':''}" href="custom.html?id=${cu.id}">
+      <div class="card-image"><img src="${cu.image}" alt="${cu.name}" loading="lazy"></div>
+      <div class="card-overlay-body">
+        <div class="card-overlay-region">${categoryLabel(cu.category)} · ${cu.periodOfYear}</div>
+        <div class="card-overlay-title">${cu.name}</div>
+        <div class="card-overlay-sub">${regionName(cu.regionId)}</div>
+      </div>
+    </a>`).join('');
 
   // Map region buttons
-  document.getElementById('map-region-btns').innerHTML = HH.regions.slice(0,6).map(r =>
-    `<a href="region.html?id=${r.id}" style="padding:.35rem .9rem;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:50px;color:white;font-size:.82rem;transition:.2s" onmouseover="this.style.background='rgba(184,134,11,.4)'" onmouseout="this.style.background='rgba(255,255,255,.15)'">${r.name}</a>`
+  document.getElementById('map-region-btns').innerHTML = HH.regions.slice(0,6).map(r=>
+    `<a href="region.html?id=${r.id}" style="padding:.35rem 1rem;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:50px;color:white;font-size:.82rem;transition:.2s" onmouseover="this.style.background='rgba(201,160,48,.35)'" onmouseout="this.style.background='rgba(255,255,255,.12)'">${r.name}</a>`
   ).join('');
 
-  // Events grid
-  document.getElementById('events-grid').innerHTML = HH.events.map(e => `
-    <div class="card">
-      <div class="card-image">
-        <img src="${e.image}" alt="${e.name}" loading="lazy">
+  // Events
+  document.getElementById('events-grid').innerHTML = HH.events.map(e=>`
+    <a class="card reveal" href="${e.website&&e.website!=='#'?e.website:'#'}" ${e.website&&e.website!=='#'?'target="_blank"':''}>
+      <div class="card-image landscape"><img src="${e.image}" alt="${e.name}" loading="lazy">
         <div class="card-badge gold">${e.type}</div>
       </div>
       <div class="card-body">
-        <div class="card-meta">📅 ${e.date}</div>
+        <div class="card-meta">📅 ${e.date} · 📍 ${e.location}</div>
         <h3 class="card-title">${e.name}</h3>
         <p class="card-desc">${e.description}</p>
       </div>
-      <div class="card-footer">
-        <span class="card-footer-tag">📍 ${e.location}</span>
-        ${e.website && e.website !== '#' ? `<a href="${e.website}" target="_blank" style="font-size:.82rem;color:var(--navy)">Πληροφορίες →</a>` : ''}
-      </div>
-    </div>`).join('');
+    </a>`).join('');
+
+  setTimeout(() => {
+    document.querySelectorAll('.reveal:not(.visible),.reveal-left:not(.visible)').forEach(el=>io.observe(el));
+  }, 100);
 });
 </script>
 </body>

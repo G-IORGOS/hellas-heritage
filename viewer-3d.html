@@ -4,992 +4,539 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>3D Viewer Φορεσιών — Hellas Heritage</title>
-  <meta name="description" content="Διαδραστικός 3D Viewer παραδοσιακών ελληνικών φορεσιών — διαχωρισμός κομματιών, ετικέτες, upload δικών σου μοντέλων.">
+  <meta name="description" content="Διαδραστικός 3D Viewer παραδοσιακών ελληνικών φορεσιών με AR υποστήριξη, annotations και lighting presets.">
   <link rel="stylesheet" href="css/style.css">
+  <!-- model-viewer — Google's open-source 3D/AR web component -->
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
   <style>
-    body { overflow: hidden; }
-    .page-wrapper { overflow: hidden; }
-    /* Compact page hero for viewer */
-    .viewer-page-hero {
-      background: linear-gradient(135deg, #0f2347 0%, #1a3a6b 100%);
-      padding: 1.2rem 0 1.4rem;
-      border-bottom: 2px solid rgba(184,134,11,.3);
+    /* ── 3D Viewer Layout ─────────────────────────────────────── */
+    .viewer-page { background:#0d1824; min-height:calc(100vh - 68px); color:white; }
+
+    /* Gender tabs */
+    .gender-tabs {
+      display:flex; gap:0;
+      background:#111e2e; border-bottom:1px solid rgba(201,160,48,.2);
+      overflow-x:auto; scrollbar-width:none;
     }
-    .viewer-page-hero .container {
-      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+    .gender-tabs::-webkit-scrollbar { display:none; }
+    .gender-tab {
+      flex:1; min-width:120px; padding:.85rem 1.5rem;
+      text-align:center; cursor:pointer;
+      font-size:.85rem; font-weight:600; color:rgba(255,255,255,.5);
+      border-bottom:3px solid transparent;
+      transition:all .25s; white-space:nowrap;
+      background:none; border-top:none; border-left:none; border-right:none;
     }
-    .viewer-title-block {}
-    .viewer-title-block h1 {
-      font-size: clamp(1.3rem, 2.5vw, 1.8rem);
-      color: white; margin: 0 0 .2rem;
+    .gender-tab:hover { color:rgba(255,255,255,.8); background:rgba(255,255,255,.04); }
+    .gender-tab.active { color:#e8c85a; border-bottom-color:#C9A030; background:rgba(201,160,48,.07); }
+
+    /* Main viewer grid */
+    .viewer-grid {
+      display:grid;
+      grid-template-columns:260px 1fr 300px;
+      height:calc(100vh - 68px - 57px - 60px);
+      min-height:500px;
     }
-    .viewer-title-block p { color: rgba(255,255,255,.6); font-size: .82rem; margin: 0; }
-    .viewer-header-actions { display: flex; gap: .6rem; align-items: center; }
-    .viewer-costume-quick {
-      display: flex; align-items: center; gap: .5rem;
-      background: rgba(255,255,255,.07); border: 1px solid rgba(184,134,11,.3);
-      border-radius: 8px; padding: .3rem .7rem;
-      font-size: .8rem; color: rgba(255,255,255,.8);
+
+    /* Left panel — parts */
+    .parts-panel {
+      background:#111e2e; border-right:1px solid rgba(201,160,48,.18);
+      display:flex; flex-direction:column; overflow:hidden;
     }
-    .viewer-costume-quick select {
-      background: transparent; border: none; color: rgba(255,255,255,.9);
-      font-size: .8rem; outline: none; cursor: pointer;
-      max-width: 180px;
+    .panel-hdr {
+      padding:.8rem 1rem; background:rgba(26,58,107,.4);
+      border-bottom:1px solid rgba(201,160,48,.2);
+      font-size:.78rem; font-weight:700; color:#e8c85a;
+      letter-spacing:1px; text-transform:uppercase;
+      display:flex; justify-content:space-between; align-items:center;
     }
-    .viewer-costume-quick select option { background: #1a3a6b; color: white; }
+    .parts-list { flex:1; overflow-y:auto; padding:.5rem 0; }
+    .parts-list::-webkit-scrollbar { width:4px; }
+    .parts-list::-webkit-scrollbar-thumb { background:rgba(201,160,48,.25); border-radius:2px; }
+    .part-item {
+      display:flex; align-items:center; gap:.65rem;
+      padding:.65rem 1rem; cursor:pointer;
+      border-left:3px solid transparent; color:rgba(255,255,255,.68);
+      font-size:.875rem; transition:all .2s;
+    }
+    .part-item:hover { background:rgba(255,255,255,.04); color:white; }
+    .part-item.active { background:rgba(201,160,48,.1); border-left-color:#C9A030; color:white; }
+    .part-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+    .part-name { flex:1; font-weight:500; }
+
+    /* Center — model-viewer */
+    .model-wrap {
+      position:relative; background:radial-gradient(ellipse at 50% 35%, #1a2d4a 0%, #0d1824 70%);
+      display:flex; flex-direction:column;
+    }
+    model-viewer {
+      flex:1; width:100%; background:transparent;
+      --poster-color:transparent;
+    }
+    .mv-controls {
+      display:flex; align-items:center; gap:.5rem; padding:.6rem 1rem;
+      background:#111e2e; border-top:1px solid rgba(201,160,48,.15);
+      flex-wrap:wrap;
+    }
+    .mv-btn {
+      display:flex; align-items:center; gap:.35rem;
+      padding:.38rem .85rem; border-radius:7px;
+      background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1);
+      color:rgba(255,255,255,.8); font-size:.78rem; font-weight:500;
+      cursor:pointer; transition:all .2s; white-space:nowrap;
+    }
+    .mv-btn:hover { background:rgba(201,160,48,.18); border-color:rgba(201,160,48,.4); color:#e8c85a; }
+    .mv-btn.active { background:rgba(201,160,48,.2); border-color:#C9A030; color:#e8c85a; }
+    .mv-sep { width:1px; height:20px; background:rgba(255,255,255,.1); }
+    .mv-right { margin-left:auto; display:flex; align-items:center; gap:.5rem; }
+    .hint { font-size:.72rem; color:rgba(255,255,255,.35); }
+
+    /* Right panel — info */
+    .info-panel {
+      background:#f9f6ef; border-left:1px solid rgba(201,160,48,.15);
+      display:flex; flex-direction:column; overflow:hidden;
+    }
+    .info-scroll { flex:1; overflow-y:auto; padding:1.35rem; }
+    .info-empty {
+      flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:.75rem; color:#9A9893; text-align:center; padding:2rem;
+    }
+    .info-empty-icon { font-size:2.5rem; opacity:.4; }
+    .info-color-bar { height:4px; border-radius:2px; margin-bottom:1rem; }
+    .info-emoji { font-size:2rem; margin-bottom:.5rem; display:block; }
+    .info-name { font-family:'Playfair Display',serif; font-size:1.2rem; color:#0B1D35; margin-bottom:.2rem; font-weight:700; }
+    .info-name-en { font-size:.8rem; color:#9A9893; font-style:italic; margin-bottom:.85rem; }
+    .info-desc { font-size:.875rem; line-height:1.72; color:#54534D; margin-bottom:1rem; }
+    .info-label { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:1.2px; color:#C9A030; margin-bottom:.4rem; margin-top:.85rem; }
+    .info-tags { display:flex; gap:.35rem; flex-wrap:wrap; }
+    .info-tag { padding:.25rem .65rem; background:#F4F2EE; border:1px solid #E8E5DF; border-radius:50px; font-size:.78rem; color:#58574F; }
+    .info-stat { display:flex; justify-content:space-between; padding:.4rem 0; border-bottom:1px solid #F4F2EE; font-size:.82rem; }
+    .info-stat:last-child { border-bottom:none; }
+    .info-stat span:first-child { color:#9A9893; }
+    .info-stat span:last-child  { font-weight:600; color:#0B1D35; }
+
+    /* Upload area */
+    .upload-area {
+      padding:1rem; border-top:1px solid rgba(201,160,48,.2);
+      background:#111e2e;
+    }
+    .upload-label { font-size:.75rem; font-weight:700; color:#e8c85a; margin-bottom:.25rem; }
+    .upload-sub { font-size:.72rem; color:rgba(255,255,255,.4); margin-bottom:.65rem; }
+    .upload-btn {
+      display:block; text-align:center; padding:.5rem;
+      background:rgba(201,160,48,.15); border:1px dashed rgba(201,160,48,.4);
+      border-radius:8px; font-size:.8rem; color:#e8c85a; cursor:pointer;
+      transition:background .2s;
+    }
+    .upload-btn:hover { background:rgba(201,160,48,.28); }
+
+    /* Lighting preset selector */
+    .lighting-row {
+      padding:.75rem 1rem; border-top:1px solid rgba(201,160,48,.15);
+      background:#0f1e30; display:flex; align-items:center; gap:.5rem; flex-wrap:wrap;
+    }
+    .light-label { font-size:.72rem; color:rgba(255,255,255,.4); text-transform:uppercase; letter-spacing:1px; flex-shrink:0; }
+    .light-btn {
+      padding:.3rem .75rem; border-radius:6px; font-size:.75rem; font-weight:600;
+      background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1);
+      color:rgba(255,255,255,.65); cursor:pointer; transition:all .2s;
+    }
+    .light-btn:hover { background:rgba(201,160,48,.18); color:#e8c85a; }
+    .light-btn.active { background:rgba(201,160,48,.2); border-color:#C9A030; color:#e8c85a; }
+
+    /* Page hero mini */
+    .viewer-hero {
+      background:linear-gradient(135deg,#0B1D35,#244D7E);
+      padding:2rem 2rem 0;
+      border-bottom:1px solid rgba(201,160,48,.2);
+    }
+    .viewer-hero h1 { color:white; font-family:'Playfair Display',serif; font-size:1.6rem; font-weight:700; margin-bottom:.25rem; }
+    .viewer-hero p { color:rgba(255,255,255,.6); font-size:.875rem; margin-bottom:1rem; }
+
+    /* AR badge */
+    .ar-badge {
+      display:inline-flex; align-items:center; gap:.35rem;
+      background:rgba(201,160,48,.2); border:1px solid rgba(201,160,48,.35);
+      border-radius:50px; padding:.2rem .65rem;
+      font-size:.72rem; font-weight:700; color:#e8c85a;
+      letter-spacing:.5px; text-transform:uppercase;
+    }
+
+    /* Placeholder for when no GLB loaded */
+    .model-placeholder {
+      flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:1rem; text-align:center; padding:2rem;
+    }
+    .model-placeholder .icon { font-size:4rem; opacity:.3; }
+    .model-placeholder h3 { font-family:'Playfair Display',serif; color:rgba(255,255,255,.6); font-size:1.1rem; }
+    .model-placeholder p { font-size:.85rem; color:rgba(255,255,255,.35); max-width:280px; }
+
+    /* Responsive */
+    @media (max-width:1024px) { .viewer-grid { grid-template-columns:220px 1fr 260px; } }
+    @media (max-width:768px) {
+      .viewer-grid { grid-template-columns:1fr; grid-template-rows:auto 56vw auto; height:auto; min-height:unset; }
+      .parts-panel { flex-direction:row; height:auto; overflow-x:auto; border-right:none; border-bottom:1px solid rgba(201,160,48,.2); max-height:80px; }
+      .panel-hdr { display:none; }
+      .parts-list { display:flex; flex-direction:row; overflow-x:auto; overflow-y:hidden; padding:0; flex:1; }
+      .part-item { flex-direction:column; min-width:70px; max-width:70px; text-align:center; font-size:.72rem; border-left:none; border-bottom:3px solid transparent; padding:.45rem .35rem; }
+      .part-item.active { border-bottom-color:#C9A030; border-left-color:transparent; }
+      .info-panel { max-height:260px; border-left:none; border-top:1px solid rgba(201,160,48,.15); }
+      .viewer-hero { padding:1.25rem 1.25rem 0; }
+      .mv-controls { gap:.35rem; }
+      .mv-right { display:none; }
+    }
   </style>
 </head>
 <body>
-<div id="navbar-placeholder" data-active="3D Viewer ✦"></div>
-<div class="page-wrapper">
+<div id="navbar-placeholder"></div>
 
-  <!-- Compact Header -->
-  <div class="viewer-page-hero">
-    <div class="container">
-      <div class="viewer-title-block">
-        <div class="breadcrumb" style="justify-content:flex-start;margin-bottom:.3rem">
-          <a href="index.html">Αρχική</a> › <a href="costumes.html">Φορεσιές</a> › 3D Viewer
-        </div>
-        <h1>🧊 3D Viewer Φορεσιών</h1>
-        <p>Διαχωρισμός κομματιών · Interactive ετικέτες · Upload GLB/GLTF μοντέλων</p>
+<div class="page-wrapper" style="padding-top:68px">
+<div class="viewer-page">
+
+  <!-- Mini hero -->
+  <div class="viewer-hero">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem">
+      <div>
+        <div style="font-size:.72rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#C9A030;margin-bottom:.5rem">Διαδραστική Εμπειρία</div>
+        <h1>3D Viewer Φορεσιών</h1>
+        <p>Εξερεύνησε κάθε κομμάτι της φορεσιάς — annotations, lighting presets, AR mobile view</p>
       </div>
-      <div class="viewer-header-actions">
-        <div class="viewer-costume-quick">
-          <span>👘</span>
-          <select id="costume-select-top">
-            <!-- Populated by JS -->
-          </select>
-        </div>
-        <a href="costumes.html" class="btn btn-ghost btn-sm" style="border-color:rgba(255,255,255,.3);color:white">← Φορεσιές</a>
+      <div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap">
+        <span class="ar-badge">📱 AR Ready</span>
+        <span class="ar-badge">🔍 Annotations</span>
+        <a href="costumes.html" class="mv-btn" style="border-color:rgba(255,255,255,.2)">← Φορεσιές</a>
       </div>
+    </div>
+
+    <!-- Gender tabs -->
+    <div class="gender-tabs" id="gender-tabs">
+      <button class="gender-tab active" data-gender="ΑΝΔΡΙΚΗ" onclick="switchGender('ΑΝΔΡΙΚΗ',this)">👨 Ανδρική</button>
+      <button class="gender-tab" data-gender="ΓΥΝΑΙΚΕΙΑ" onclick="switchGender('ΓΥΝΑΙΚΕΙΑ',this)">👩 Γυναικεία</button>
+      <button class="gender-tab" data-gender="ΠΑΙΔΙΚΗ" onclick="switchGender('ΠΑΙΔΙΚΗ',this)">🧒 Παιδική</button>
+      <button class="gender-tab" data-gender="ΜΙΚΤΗ" onclick="switchGender('ΜΙΚΤΗ',this)">👫 Μικτή</button>
     </div>
   </div>
 
-  <!-- Main Viewer Layout -->
-  <div class="viewer-wrap">
+  <!-- Main grid -->
+  <div class="viewer-grid">
 
-    <!-- ── LEFT: Parts Panel ── -->
-    <div class="v-parts-panel">
-      <div class="v-panel-header">
-        <span>Κομμάτια</span>
-        <span class="v-badge" id="parts-count">8</span>
+    <!-- LEFT: Parts panel -->
+    <div class="parts-panel">
+      <div class="panel-hdr">
+        <span>Μέρη Φορεσιάς</span>
+        <span style="background:#C9A030;color:white;font-size:.68rem;font-weight:700;padding:.12rem .4rem;border-radius:50px" id="parts-count">0</span>
       </div>
-      <div class="v-parts-list" id="parts-list">
-        <!-- Populated by JS -->
+      <div class="parts-list" id="parts-list"></div>
+
+      <!-- Upload -->
+      <div class="upload-area">
+        <div class="upload-label">Upload δικό σου μοντέλο</div>
+        <div class="upload-sub">GLB / GLTF αρχείο (max 50MB)</div>
+        <label class="upload-btn" for="glb-upload">📁 Επίλεξε αρχείο GLB</label>
+        <input type="file" id="glb-upload" accept=".glb,.gltf" style="display:none" onchange="loadCustomGLB(this)">
+        <div id="upload-status" style="font-size:.72rem;color:rgba(255,255,255,.4);margin-top:.4rem"></div>
       </div>
-      <!-- Upload Section -->
-      <div class="v-upload-section">
-        <div class="v-upload-title">📤 Upload 3D Μοντέλο</div>
-        <div class="v-upload-desc">Υποστηριζόμενα: .GLB · .GLTF<br>Το μοντέλο αντικαθιστά το demo</div>
-        <label class="v-upload-btn" for="model-upload">
-          📁 Επίλεξε αρχείο
-        </label>
-        <input type="file" id="model-upload" accept=".glb,.gltf" style="display:none">
-        <div id="upload-status" class="v-upload-status">Δεν έχει φορτωθεί αρχείο</div>
-        <div class="v-upload-progress" id="upload-progress" style="display:none">
-          <div class="v-upload-progress-bar" id="upload-bar"></div>
+    </div>
+
+    <!-- CENTER: model-viewer -->
+    <div class="model-wrap">
+      <!-- model-viewer component -->
+      <model-viewer
+        id="mv"
+        src=""
+        alt="3D Φορεσιά"
+        shadow-intensity="1"
+        camera-controls
+        touch-action="pan-y"
+        auto-rotate
+        auto-rotate-delay="3000"
+        rotation-per-second="15deg"
+        exposure="1.1"
+        environment-image="neutral"
+        ar
+        ar-modes="webxr scene-viewer quick-look"
+        ar-scale="auto"
+        style="width:100%;flex:1;background:transparent;--poster-color:transparent"
+      >
+        <!-- AR button (auto-shows on supported mobile) -->
+        <button slot="ar-button" style="
+          position:absolute;bottom:1.5rem;right:1.5rem;
+          background:rgba(11,29,53,.9);border:1px solid #C9A030;
+          border-radius:50px;padding:.55rem 1.1rem;
+          color:#e8c85a;font-size:.8rem;font-weight:700;cursor:pointer;
+          display:flex;align-items:center;gap:.4rem;
+        ">📱 Δες σε AR</button>
+
+        <!-- Hotspot annotations (populated by JS) -->
+        <div id="hotspots-container"></div>
+
+        <!-- Placeholder poster -->
+        <div id="mv-placeholder" class="model-placeholder" slot="poster">
+          <div class="icon">🧊</div>
+          <h3>Φόρτωση 3D Μοντέλου</h3>
+          <p>Επίλεξε φορεσιά ή ανέβασε GLB αρχείο</p>
         </div>
-        <div style="margin-top:.5rem;font-size:.7rem;color:rgba(255,255,255,.3);line-height:1.4">
-          💡 Εξαγωγή από Blender/ZBrush σε GLB format για βέλτιστα αποτελέσματα
+      </model-viewer>
+
+      <!-- Lighting presets -->
+      <div class="lighting-row">
+        <span class="light-label">Φωτισμός:</span>
+        <button class="light-btn active" onclick="setLight('neutral',this)">☁️ Ουδέτερο</button>
+        <button class="light-btn" onclick="setLight('legacy',this)">🌤 Κλασικό</button>
+        <button class="light-btn" onclick="setLight('commerce',this)">💡 Studio</button>
+        <button class="light-btn" onclick="setLight('dawn',this)">🌅 Αυγή</button>
+        <button class="light-btn" onclick="setLight('night',this)">🌙 Νύχτα</button>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="mv-controls">
+        <button class="mv-btn" onclick="mvToggleRotate(this)" id="btn-rotate">⟳ Auto-Rotate</button>
+        <div class="mv-sep"></div>
+        <button class="mv-btn" onclick="mvReset()">🏠 Reset</button>
+        <button class="mv-btn" onclick="mvToggleAnnotations(this)" id="btn-annot">💬 Annotations</button>
+        <button class="mv-btn" id="btn-ar" onclick="document.getElementById('mv').activateAR()">📱 AR</button>
+        <div class="mv-sep"></div>
+        <button class="mv-btn" onclick="mvWireframe(this)" id="btn-wire">⬡ Wireframe</button>
+        <div class="mv-right">
+          <span class="hint" id="mv-hint">Drag να περιστρέψεις · Pinch zoom</span>
         </div>
       </div>
     </div>
 
-    <!-- ── CENTER: Canvas ── -->
-    <div class="v-canvas-wrap" id="canvas-container">
-      <canvas id="canvas3d"></canvas>
-      <!-- Labels overlay -->
-      <div id="labels-overlay" style="position:absolute;inset:0;pointer-events:none;display:none"></div>
-      <!-- Loading -->
-      <div class="v-loading" id="loading-overlay">
-        <div class="v-loading-spinner"></div>
-        <div style="color:rgba(255,255,255,.7)">Φόρτωση 3D Σκηνής...</div>
+    <!-- RIGHT: Info panel -->
+    <div class="info-panel">
+      <div id="info-empty" class="info-empty">
+        <div class="info-empty-icon">👆</div>
+        <p style="font-size:.875rem;color:#9A9893">Επίλεξε ένα μέρος<br>για να δεις πληροφορίες</p>
       </div>
-      <!-- Controls hint -->
-      <div class="v-controls-hint" id="controls-hint">
-        🖱 Drag: Περιστροφή &nbsp;·&nbsp; Scroll: Zoom &nbsp;·&nbsp; Click: Επιλογή κομματιού
-      </div>
-      <!-- Explode progress indicator -->
-      <div id="explode-indicator" style="position:absolute;top:.75rem;left:50%;transform:translateX(-50%);display:none;background:rgba(184,134,11,.15);border:1px solid rgba(184,134,11,.4);border-radius:50px;padding:.3rem 1rem;color:#e8c85a;font-size:.75rem;font-weight:600;letter-spacing:.5px">
-        💥 ΔΙΑΧΩΡΙΣΜΟΣ ΚΟΜΜΑΤΙΩΝ
-      </div>
+      <div id="info-content" class="info-scroll" style="display:none"></div>
     </div>
 
-    <!-- ── RIGHT: Info Panel ── -->
-    <div class="v-info-panel">
-      <div id="part-info-empty" class="v-info-empty">
-        <div style="font-size:3rem;margin-bottom:.5rem">👆</div>
-        <p style="max-width:180px">Κάνε κλικ σε κομμάτι για λεπτομέρειες</p>
-        <div style="margin-top:1rem;padding:.75rem;background:var(--grey-100);border-radius:10px;font-size:.8rem;color:var(--grey-600);text-align:left">
-          <strong style="display:block;margin-bottom:.3rem;color:var(--navy)">Οδηγίες:</strong>
-          🖱 Drag → Περιστροφή<br>
-          ⚙️ Scroll → Zoom<br>
-          👆 Click → Επιλογή μέρους<br>
-          💥 Explode → Διαχωρισμός<br>
-          👁 Eye → Ορατότητα
-        </div>
-      </div>
-      <div id="part-info-content" class="v-info-content" style="display:none">
-        <div id="part-color-bar" class="v-info-color-bar"></div>
-        <span id="part-emoji" class="v-info-emoji"></span>
-        <h3 id="part-name" class="v-info-name"></h3>
-        <p id="part-name-en" class="v-info-name-en"></p>
-        <p id="part-desc" class="v-info-desc"></p>
-        <div class="v-info-label">Υλικά</div>
-        <div id="part-materials" class="v-materials-grid"></div>
-        <div class="v-info-label" style="margin-top:.75rem">Στοιχεία</div>
-        <div id="part-stats"></div>
-        <div style="margin-top:1rem">
-          <button id="btn-isolate" onclick="isolatePart()" class="btn btn-navy btn-sm" style="width:100%;justify-content:center;margin-bottom:.5rem">🔍 Απόμονωση</button>
-          <button id="btn-show-all" onclick="showAllParts()" class="btn btn-ghost btn-sm" style="width:100%;justify-content:center">👁 Εμφάνιση Όλων</button>
-        </div>
-      </div>
-
-      <!-- Scene Settings -->
-      <div style="padding:.85rem 1rem;border-top:1px solid var(--grey-200);background:white">
-        <div class="v-panel-subheader">Ρυθμίσεις Σκηνής</div>
-        <div style="display:flex;flex-direction:column;gap:.5rem;margin-top:.5rem">
-          <label style="display:flex;align-items:center;justify-content:space-between;font-size:.8rem;color:var(--grey-600)">
-            Πλέγμα εδάφους
-            <input type="checkbox" id="toggle-grid" checked onchange="toggleGrid(this.checked)">
-          </label>
-          <label style="display:flex;align-items:center;justify-content:space-between;font-size:.8rem;color:var(--grey-600)">
-            Wireframe
-            <input type="checkbox" id="toggle-wire" onchange="toggleWireframe(this.checked)">
-          </label>
-          <label style="display:flex;align-items:center;justify-content:space-between;font-size:.8rem;color:var(--grey-600)">
-            Περιστροφή αξόνων
-            <input type="checkbox" id="toggle-axes" onchange="toggleAxes(this.checked)">
-          </label>
-          <label style="display:flex;align-items:center;justify-content:space-between;font-size:.8rem;color:var(--grey-600)">
-            Auto-rotate
-            <input type="checkbox" id="toggle-autorotate" onchange="setAutoRotate(this.checked)">
-          </label>
-        </div>
-      </div>
-    </div>
-  </div><!-- viewer-wrap -->
-
-  <!-- ── Toolbar ── -->
-  <div class="v-toolbar">
-    <button class="v-tool-btn" id="btn-explode" onclick="setExplode(true)">
-      💥 Διαχωρισμός
-    </button>
-    <button class="v-tool-btn" id="btn-assemble" onclick="setExplode(false)" disabled>
-      🔧 Συναρμολόγηση
-    </button>
-    <div class="v-toolbar-divider"></div>
-    <button class="v-tool-btn" id="btn-labels" onclick="toggleLabels()">
-      🏷 Ετικέτες
-    </button>
-    <button class="v-tool-btn" onclick="resetCamera()">
-      ↺ Camera
-    </button>
-    <button class="v-tool-btn" id="btn-screenshot" onclick="takeScreenshot()">
-      📸 Screenshot
-    </button>
-    <div class="v-toolbar-right">
-      <div style="font-size:.72rem;color:rgba(255,255,255,.25)">
-        Three.js r128 · WebGL
-      </div>
-      <div id="fps-display" style="font-size:.72rem;color:rgba(255,255,255,.3)">60 FPS</div>
-    </div>
   </div>
+</div>
+</div>
 
-</div><!-- page-wrapper -->
 <div id="footer-placeholder"></div>
 <div id="toast"></div>
 
-<!-- Three.js from CDN (r128) -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="js/data.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase.js"></script>
 <script src="js/app.js"></script>
-
 <script>
-/* ================================================================
-   HELLAS HERITAGE — 3D Viewer
-   Three.js r128 · Exploded View · Interactive Labels
-   ================================================================ */
+// ══════════════════════════════════════════════════════════
+//  HELLAS HERITAGE — 3D Viewer (model-viewer based)
+// ══════════════════════════════════════════════════════════
 
-// ── Globals ────────────────────────────────────────────────────
-let scene, camera, renderer, costumeGroup, gridHelper, axesHelper;
-let mouse = new THREE.Vector2();
-let raycaster = new THREE.Raycaster();
-let selectedPartId = null;
-let explodeT = 0, targetT = 0;
-let labelsVisible = false;
-let autoRotate = false;
-let isDragging = false, prevMouse = {x:0, y:0};
-let rotX = 0, rotY = 0;
-let camDist = 7;
-let fpsFrames = 0, fpsLast = performance.now();
-let isExploded = false;
+const mv = document.getElementById('mv');
+let currentGender = 'ΑΝΔΡΙΚΗ';
+let currentPart   = null;
+let annotationsOn = true;
 
-// ── Part Definitions ──────────────────────────────────────────
-// homePos  = assembled position
-// explodeDir = direction × magnitude to move when exploded
-const PART_DEFS = [
-  {
-    id: 'headpiece',
-    name: 'Κεφαλόδεσμος',
-    nameEn: 'Headpiece',
-    emoji: '👑',
-    description: 'Ο παραδοσιακός κεφαλόδεσμος κοσμείται με χρυσονήματα, χάντρες και αργυρά ή χρυσά νομίσματα. Η μορφή και η πολυτέλειά του αντικατοπτρίζει την κοινωνική θέση και τον πλούτο της οικογένειας.',
-    materials: ['Μετάξι', 'Χρυσονήματα', 'Νομίσματα', 'Χάντρες', 'Κεντήματα'],
-    colorHex: '#B8860B',
-    threeColor: 0xB8860B,
-    emissiveColor: 0x3d2c00,
-    shininess: 80,
-    homeX: 0,  homeY: 2.72, homeZ: 0,
-    exX: 0,    exY: 5.5,   exZ: 0,
-    layer: 'Κεφαλή',
-    weight: '180g',
-  },
-  {
-    id: 'blouse',
-    name: 'Μπλούζα / Πουκάμισο',
-    nameEn: 'Blouse / Shirt',
-    emoji: '👚',
-    description: 'Το λευκό μεταξωτό πουκάμισο αποτελεί τη βάση της ενδυμασίας. Φοριέται κοντά στο δέρμα και συχνά διακοσμείται με λεπτά δαντελένια μανικέτια. Είναι το πρώτο ένδυμα που φοριέται.',
-    materials: ['Μεταξωτό ύφασμα', 'Βαμβακερό λινό', 'Δαντέλα'],
-    colorHex: '#F5F0E8',
-    threeColor: 0xF5F0E8,
-    emissiveColor: 0x1a1810,
-    shininess: 15,
-    homeX: 0,  homeY: 0.9,  homeZ: 0,
-    exX: 0,    exY: 0.9,   exZ: -2.5,
-    layer: 'Κορμός (εσωτερικό)',
-    weight: '220g',
-  },
-  {
-    id: 'vest',
-    name: 'Επενδύτης / Γιλέκο',
-    nameEn: 'Vest / Jacket',
-    emoji: '🧥',
-    description: 'Ο επενδύτης φοριέται πάνω από τη μπλούζα και αποτελεί το κυρίαρχο ένδυμα της άνω περιοχής. Είναι πλούσια διακοσμημένος με χρυσοκέντητα μοτίβα που αφηγούνται ιστορίες της τοπικής παράδοσης.',
-    materials: ['Βελούδο', 'Μετάξι', 'Χρυσονήματα', 'Κέντημα'],
-    colorHex: '#1A3A6B',
-    threeColor: 0x1A3A6B,
-    emissiveColor: 0x060d1e,
-    shininess: 25,
-    homeX: 0,  homeY: 0.95, homeZ: 0.04,
-    exX: 0,    exY: 0.95,  exZ: 2.8,
-    layer: 'Κορμός (εξωτερικό)',
-    weight: '350g',
-  },
-  {
-    id: 'belt',
-    name: 'Ζώνη',
-    nameEn: 'Belt',
-    emoji: '🪙',
-    description: 'Η παραδοσιακή ζώνη, συχνά κατασκευασμένη από ασήμι ή χρυσό, κλείνει τον επενδύτη και τονίζει τη μέση. Ορισμένες ζώνες είναι αρθρωτές με συνδεόμενα τμήματα που δείχνουν τον πλούτο.',
-    materials: ['Ασήμι', 'Χρυσός', 'Χρυσονήμα', 'Ψευδάργυρος'],
-    colorHex: '#C8960A',
-    threeColor: 0xC8960A,
-    emissiveColor: 0x3d2c00,
-    shininess: 100,
-    homeX: 0,  homeY: 0.28, homeZ: 0.06,
-    exX: 0,    exY: 0.28,  exZ: 4.5,
-    layer: 'Μέση',
-    weight: '280g',
-  },
-  {
-    id: 'skirt',
-    name: 'Φούστα',
-    nameEn: 'Skirt',
-    emoji: '👗',
-    description: 'Η φούστα είναι συχνά πολυστρωματική και αποτελείται από πλούσιο ύφασμα που απλώνεται προς τα κάτω. Το χρώμα και τα μοτίβα ποικίλλουν ανά περιοχή — σκούρα χρώματα στη Βόρεια Ελλάδα, πιο φωτεινά στα νησιά.',
-    materials: ['Μαλλί', 'Μετάξι', 'Βαμβάκι', 'Χρυσοκλωστή'],
-    colorHex: '#6B1A1A',
-    threeColor: 0x6B1A1A,
-    emissiveColor: 0x1e0606,
-    shininess: 12,
-    homeX: 0,  homeY: -1.1, homeZ: 0,
-    exX: 0,    exY: -4.2,  exZ: 0,
-    layer: 'Κάτω μέρος',
-    weight: '650g',
-  },
-  {
-    id: 'apron',
-    name: 'Ποδιά',
-    nameEn: 'Apron',
-    emoji: '🎀',
-    description: 'Η ποδιά φοριέται μπροστά από τη φούστα και είναι συχνά η πιο διακοσμημένη επιφάνεια της φορεσιάς. Φέρει πλούσια κεντήματα που μπορεί να απεικονίζουν φυτά, ζώα ή γεωμετρικά μοτίβα.',
-    materials: ['Λευκό λινό', 'Μεταξωτή κλωστή', 'Κεντήματα'],
-    colorHex: '#E8DFC8',
-    threeColor: 0xE8DFC8,
-    emissiveColor: 0x151310,
-    shininess: 20,
-    homeX: 0,   homeY: -1.0, homeZ: 0.35,
-    exX: 0,     exY: -1.0,  exZ: 6.0,
-    layer: 'Μπροστινό κάτω',
-    weight: '180g',
-  },
-  {
-    id: 'sleeve_l',
-    name: 'Μανίκι Αριστερό',
-    nameEn: 'Left Sleeve',
-    emoji: '🦾',
-    description: 'Τα μανίκια μπορεί να είναι μέρος της μπλούζας ή ξεχωριστά κομμάτια. Συχνά φαρδύνουν προς τα κάτω (bell sleeves) ή καταλήγουν σε στενά μανικέτια με δαντέλα. Η εσωτερική πλευρά είναι ενίοτε κεντημένη.',
-    materials: ['Μεταξωτό ύφασμα', 'Δαντέλα', 'Βαμβάκι'],
-    colorHex: '#EDE8DC',
-    threeColor: 0xEDE8DC,
-    emissiveColor: 0x151412,
-    shininess: 18,
-    homeX: -0.72, homeY: 0.85, homeZ: 0,
-    exX: -4.2,    exY: 2.5,   exZ: 0,
-    layer: 'Αριστερός βραχίονας',
-    weight: '95g',
-  },
-  {
-    id: 'sleeve_r',
-    name: 'Μανίκι Δεξί',
-    nameEn: 'Right Sleeve',
-    emoji: '🦾',
-    description: 'Το δεξί μανίκι είναι συμμετρικό με το αριστερό. Η ακριβής γεωμετρία, τα κεντήματα και το μήκος εξαρτώνται από την τοπική παράδοση. Στις εορταστικές φορεσιές τα μανίκια είναι πλούσια διακοσμημένα.',
-    materials: ['Μεταξωτό ύφασμα', 'Δαντέλα', 'Βαμβάκι'],
-    colorHex: '#EDE8DC',
-    threeColor: 0xEDE8DC,
-    emissiveColor: 0x151412,
-    shininess: 18,
-    homeX: 0.72,  homeY: 0.85, homeZ: 0,
-    exX: 4.2,     exY: 2.5,   exZ: 0,
-    layer: 'Δεξί βραχίονας',
-    weight: '95g',
-  },
-];
+// ── Costume part definitions per gender ──────────────────
+const PARTS = {
+  ΑΝΔΡΙΚΗ: [
+    { id:'hat',     name:'Κεφαλή / Καλυμμαύχι', icon:'👑', color:'#C9A030',
+      note:'Το καλυμμαύχι είναι αναπόσπαστο στοιχείο της ανδρικής φορεσιάς στη Μακεδονία και Ήπειρο.',
+      materials:['Μαλλί','Βελούδο'], hotspot:{x:.5,y:.92,z:.1} },
+    { id:'vest',    name:'Σάκκος / Ζιπούνι',    icon:'🧥', color:'#1B3A5C',
+      note:'Εξωτερικό ένδυμα που φοριέται πάνω από το πουκάμισο. Κεντήματα με χρυσή κλωστή.',
+      materials:['Βαμβάκι','Μετάξι','Χρυσή κλωστή'], hotspot:{x:.5,y:.65,z:.1} },
+    { id:'shirt',   name:'Πουκάμισο',            icon:'👕', color:'#6B8C69',
+      note:'Λευκό ή εκρού βαμβακερό πουκάμισο με κεντημένο γιακά.',
+      materials:['Βαμβάκι','Λινό'], hotspot:{x:.5,y:.72,z:.2} },
+    { id:'belt',    name:'Ζώνη / Σελάχι',        icon:'🔶', color:'#B85C38',
+      note:'Δερμάτινη ζώνη με μεταλλικές αγκράφες. Χρησίμευε ως θήκη για όπλα.',
+      materials:['Δέρμα','Ασήμι'], hotspot:{x:.5,y:.55,z:.1} },
+    { id:'foustanela',name:'Φουστανέλα',          icon:'🩳', color:'#244D7E',
+      note:'Η φουστανέλα έχει παραδοσιακά 400 πτυχές — μία για κάθε χρόνο Τουρκοκρατίας.',
+      materials:['Βαμβάκι','Λινό'], hotspot:{x:.5,y:.45,z:.1} },
+    { id:'stockings',name:'Κάλτσες / Κνημίδες', icon:'🧦', color:'#8B3A1E',
+      note:'Μάλλινες ή βαμβακερές κάλτσες με κεντητά σχέδια.',
+      materials:['Μαλλί'], hotspot:{x:.5,y:.25,z:.1} },
+    { id:'shoes',   name:'Τσαρούχια',             icon:'👟', color:'#4A3728',
+      note:'Δερμάτινα παπούτσια με χαρακτηριστική ανασηκωμένη μύτη και φούντα.',
+      materials:['Δέρμα'], hotspot:{x:.5,y:.08,z:.1} },
+  ],
+  ΓΥΝΑΙΚΕΙΑ: [
+    { id:'headdress',name:'Κεφαλόδεσμος',       icon:'👑', color:'#C9A030',
+      note:'Περίτεχνο κάλυμμα κεφαλής με κεντήματα — διαφέρει σε κάθε περιοχή.',
+      materials:['Μαλλί','Μετάξι','Χρυσοκλωστή'], hotspot:{x:.5,y:.92,z:.1} },
+    { id:'sagia',    name:'Σαγιάς / Επανωφόρι', icon:'🧣', color:'#1B3A5C',
+      note:'Εξωτερικό φόρεμα συχνά με κεντήματα στα μανίκια και στο τελείωμα.',
+      materials:['Βελούδο','Μετάξι'], hotspot:{x:.5,y:.68,z:.1} },
+    { id:'chemise',  name:'Χιτώνας / Πουκάμισο',icon:'👗', color:'#6B8C69',
+      note:'Λεπτό εσωτερικό πουκάμισο με εξελιγμένα κεντήματα στα μανίκια.',
+      materials:['Βαμβάκι','Μετάξι'], hotspot:{x:.5,y:.75,z:.2} },
+    { id:'apron',    name:'Ποδιά',               icon:'🔶', color:'#B85C38',
+      note:'Χαρακτηριστική ποδιά που διακοσμεί το μπροστινό μέρος της φορεσιάς.',
+      materials:['Μαλλί','Βαμβάκι','Μεταξωτά νήματα'], hotspot:{x:.5,y:.52,z:.15} },
+    { id:'belt2',    name:'Ζώνη',                icon:'✨', color:'#244D7E',
+      note:'Υφαντή ή δερμάτινη ζώνη που τονίζει τη μέση.',
+      materials:['Δέρμα','Ασήμι'], hotspot:{x:.5,y:.58,z:.1} },
+    { id:'skirt',    name:'Φούστα / Σκούτο',    icon:'👗', color:'#8B3A1E',
+      note:'Πλατιά φούστα με πλούσια υφαντά και κεντητά σχέδια.',
+      materials:['Μαλλί','Βαμβάκι'], hotspot:{x:.5,y:.38,z:.1} },
+    { id:'shoes2',   name:'Υποδήματα',           icon:'👟', color:'#4A3728',
+      note:'Δερμάτινα ή υφαντά παπούτσια ανάλογα με την περιοχή.',
+      materials:['Δέρμα'], hotspot:{x:.5,y:.08,z:.1} },
+  ],
+  ΠΑΙΔΙΚΗ: [
+    { id:'cap',     name:'Σκούφος',              icon:'🎓', color:'#C9A030',
+      note:'Μικρό σκουφάκι παρόμοιο με αυτό των ενηλίκων σε μικρότερο μέγεθος.',
+      materials:['Μαλλί'], hotspot:{x:.5,y:.9,z:.1} },
+    { id:'vest_k',  name:'Γιλέκο',              icon:'🧥', color:'#1B3A5C',
+      note:'Μικρό γιλέκο με κεντήματα — η παιδική εκδοχή της ενήλικης φορεσιάς.',
+      materials:['Βαμβάκι','Βελούδο'], hotspot:{x:.5,y:.65,z:.1} },
+    { id:'shirt_k', name:'Πουκάμισο',            icon:'👕', color:'#6B8C69',
+      note:'Απλό βαμβακερό πουκάμισο κατάλληλο για τρυφερά ηλικία.',
+      materials:['Βαμβάκι'], hotspot:{x:.5,y:.72,z:.2} },
+    { id:'pants_k', name:'Βρακί / Παντελόνι',   icon:'👖', color:'#244D7E',
+      note:'Παραδοσιακό βρακί σε παιδικές διαστάσεις.',
+      materials:['Βαμβάκι','Λινό'], hotspot:{x:.5,y:.45,z:.1} },
+    { id:'shoes_k', name:'Παπούτσια',            icon:'👟', color:'#4A3728',
+      note:'Μικρά δερμάτινα παπούτσια παρόμοια με των ενηλίκων.',
+      materials:['Δέρμα'], hotspot:{x:.5,y:.1,z:.1} },
+  ],
+  ΜΙΚΤΗ: [
+    { id:'duo',     name:'Ανδρική & Γυναικεία', icon:'👫', color:'#C9A030',
+      note:'Συνδυαστική προβολή ανδρικής και γυναικείας φορεσιάς της ίδιας περιοχής.',
+      materials:[], hotspot:{x:.5,y:.5,z:.1} },
+  ],
+};
 
-// Will hold {def, mesh, labelEl} after init
-let PARTS = [];
+// Default GLB URLs (αντικατέστησε με πραγματικά)
+const GLB_URLS = {
+  ΑΝΔΡΙΚΗ:   'assets/avatars/male.glb',
+  ΓΥΝΑΙΚΕΙΑ: 'assets/avatars/female.glb',
+  ΠΑΙΔΙΚΗ:   'assets/avatars/child.glb',
+  ΜΙΚΤΗ:     'assets/avatars/male.glb',
+};
 
-// ── Geometry Builders ─────────────────────────────────────────
-function buildPartMesh(def) {
-  const mat = new THREE.MeshPhongMaterial({
-    color:    def.threeColor,
-    emissive: def.emissiveColor,
-    shininess: def.shininess,
-    side: THREE.DoubleSide,
-  });
-
-  let group = new THREE.Group();
-  group.userData = { partId: def.id, mat };
-
-  switch (def.id) {
-
-    case 'headpiece': {
-      // Torus base
-      const torus = new THREE.Mesh(
-        new THREE.TorusGeometry(0.28, 0.055, 10, 28),
-        mat.clone()
-      );
-      torus.rotation.x = Math.PI / 2;
-      // Center dome
-      const dome = new THREE.Mesh(
-        new THREE.SphereGeometry(0.14, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2),
-        mat.clone()
-      );
-      dome.position.y = 0.02;
-      // Hanging coins (small discs)
-      for (let i = 0; i < 7; i++) {
-        const angle = (i / 7) * Math.PI * 2;
-        const coin = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.045, 0.045, 0.01, 10),
-          mat.clone()
-        );
-        coin.position.set(Math.cos(angle) * 0.28, -0.12 - (i % 2) * 0.08, Math.sin(angle) * 0.28);
-        group.add(coin);
-      }
-      group.add(torus, dome);
-      break;
-    }
-
-    case 'blouse': {
-      // Body
-      const body = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.36, 0.42, 1.2, 18),
-        mat.clone()
-      );
-      // Collar
-      const collar = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.22, 0.36, 0.12, 18),
-        mat.clone()
-      );
-      collar.position.y = 0.66;
-      group.add(body, collar);
-      break;
-    }
-
-    case 'vest': {
-      // Vest body (slightly wider, shorter than blouse)
-      const body = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.38, 0.44, 1.05, 8), // 8 sides = more angular
-        mat.clone()
-      );
-      // Front opening (darker strip)
-      const opening = new THREE.Mesh(
-        new THREE.BoxGeometry(0.09, 1.05, 0.02),
-        new THREE.MeshPhongMaterial({ color: 0x0a1d3a, emissive: 0x020609, shininess: 5 })
-      );
-      opening.position.z = 0.39;
-      // Gold trim lines
-      const trimMat = new THREE.MeshPhongMaterial({ color: 0xB8860B, emissive: 0x3d2c00, shininess: 80 });
-      const trimL = new THREE.Mesh(new THREE.BoxGeometry(0.025, 1.05, 0.025), trimMat);
-      trimL.position.set(-0.05, 0, 0.38);
-      const trimR = new THREE.Mesh(new THREE.BoxGeometry(0.025, 1.05, 0.025), trimMat);
-      trimR.position.set(0.05, 0, 0.38);
-      group.add(body, opening, trimL, trimR);
-      break;
-    }
-
-    case 'belt': {
-      // Flat belt ring
-      const ring = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.46, 0.46, 0.14, 28),
-        mat.clone()
-      );
-      // Buckle (front decorative piece)
-      const buckle = new THREE.Mesh(
-        new THREE.BoxGeometry(0.18, 0.12, 0.04),
-        new THREE.MeshPhongMaterial({ color: 0xD4A500, emissive: 0x4a3800, shininess: 120 })
-      );
-      buckle.position.z = 0.48;
-      group.add(ring, buckle);
-      break;
-    }
-
-    case 'skirt': {
-      // Flared skirt - multiple rings for layered look
-      const skirt = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.44, 1.05, 2.2, 22),
-        mat.clone()
-      );
-      // Hem decoration (gold trim at bottom)
-      const hem = new THREE.Mesh(
-        new THREE.CylinderGeometry(1.04, 1.06, 0.06, 22),
-        new THREE.MeshPhongMaterial({ color: 0xB8860B, emissive: 0x3d2c00, shininess: 60 })
-      );
-      hem.position.y = -1.07;
-      // Inner layer for volume
-      const inner = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.42, 0.95, 2.1, 18),
-        new THREE.MeshPhongMaterial({
-          color: 0x4d1212, emissive: 0x100404, shininess: 8, side: THREE.BackSide
-        })
-      );
-      group.add(skirt, hem, inner);
-      break;
-    }
-
-    case 'apron': {
-      // Flat apron panel
-      const panel = new THREE.Mesh(
-        new THREE.BoxGeometry(0.62, 1.75, 0.025),
-        mat.clone()
-      );
-      // Decorative border
-      const borderMat = new THREE.MeshPhongMaterial({ color: 0xB8860B, emissive: 0x3d2c00, shininess: 60 });
-      const borderTop = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.04, 0.03), borderMat);
-      borderTop.position.y = 0.89;
-      const borderBot = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.04, 0.03), borderMat);
-      borderBot.position.y = -0.89;
-      const borderL = new THREE.Mesh(new THREE.BoxGeometry(0.04, 1.75, 0.03), borderMat);
-      borderL.position.x = -0.29;
-      const borderR = new THREE.Mesh(new THREE.BoxGeometry(0.04, 1.75, 0.03), borderMat);
-      borderR.position.x = 0.29;
-      // Embroidery pattern hint (cross in center)
-      const crossH = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.02, 0.03), borderMat);
-      const crossV = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.4, 0.03), borderMat);
-      group.add(panel, borderTop, borderBot, borderL, borderR, crossH, crossV);
-      break;
-    }
-
-    case 'sleeve_l':
-    case 'sleeve_r': {
-      const isLeft = def.id === 'sleeve_l';
-      const sign = isLeft ? -1 : 1;
-      // Upper arm
-      const upper = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.155, 0.145, 0.75, 12),
-        mat.clone()
-      );
-      upper.rotation.z = sign * 0.65;
-      upper.position.set(sign * 0.22, 0.18, 0);
-      // Lower arm (bell-shaped)
-      const lower = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.12, 0.22, 0.7, 12),
-        mat.clone()
-      );
-      lower.rotation.z = sign * 0.55;
-      lower.position.set(sign * 0.58, -0.26, 0);
-      // Cuff
-      const cuffMat = new THREE.MeshPhongMaterial({ color: 0xffffff, emissive: 0x101010, shininess: 30 });
-      const cuff = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.23, 0.23, 0.08, 12),
-        cuffMat
-      );
-      cuff.rotation.z = sign * 0.55;
-      cuff.position.set(sign * 0.72, -0.58, 0);
-      group.add(upper, lower, cuff);
-      break;
-    }
-  }
-
-  return group;
+// ── Switch gender ────────────────────────────────────────
+function switchGender(gender, tab) {
+  currentGender = gender;
+  currentPart   = null;
+  document.querySelectorAll('.gender-tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  renderParts();
+  loadModel(GLB_URLS[gender]);
+  clearInfo();
 }
 
-// ── Scene Setup ───────────────────────────────────────────────
-function initScene() {
-  const container = document.getElementById('canvas-container');
-  const canvas    = document.getElementById('canvas3d');
-
-  // Scene
-  scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x0d1824);
-  scene.fog = new THREE.FogExp2(0x0d1824, 0.045);
-
-  // Camera
-  camera = new THREE.PerspectiveCamera(42, container.clientWidth / container.clientHeight, 0.1, 100);
-  camera.position.set(0, 1.0, camDist);
-
-  // Renderer
-  renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-  renderer.setSize(container.clientWidth, container.clientHeight);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-
-  // ── Lights ──────────────────────────────────────────────────
-  // Ambient (warm base)
-  const ambient = new THREE.AmbientLight(0xfff8e8, 0.45);
-  scene.add(ambient);
-
-  // Main directional (cool white, front-top-right)
-  const dirMain = new THREE.DirectionalLight(0xffffff, 1.1);
-  dirMain.position.set(3, 6, 5);
-  dirMain.castShadow = true;
-  dirMain.shadow.mapSize.set(1024, 1024);
-  dirMain.shadow.camera.near = 0.5;
-  dirMain.shadow.camera.far = 30;
-  scene.add(dirMain);
-
-  // Fill (golden warm, back-left)
-  const dirFill = new THREE.DirectionalLight(0xffe4a0, 0.55);
-  dirFill.position.set(-4, 2, -4);
-  scene.add(dirFill);
-
-  // Rim light (cool blue, bottom-back)
-  const rimLight = new THREE.PointLight(0x4080c0, 0.4, 20);
-  rimLight.position.set(0, -3, -5);
-  scene.add(rimLight);
-
-  // Hemisphere (sky blue ↔ warm ground)
-  const hemi = new THREE.HemisphereLight(0x334466, 0x4a3420, 0.3);
-  scene.add(hemi);
-
-  // ── Grid ──────────────────────────────────────────────────
-  gridHelper = new THREE.GridHelper(14, 20, 0xB8860B, 0x1a2a3a);
-  gridHelper.position.y = -2.35;
-  gridHelper.material.opacity = 0.35;
-  gridHelper.material.transparent = true;
-  scene.add(gridHelper);
-
-  // ── Axes ──────────────────────────────────────────────────
-  axesHelper = new THREE.AxesHelper(2);
-  axesHelper.position.y = -2.3;
-  axesHelper.visible = false;
-  scene.add(axesHelper);
-
-  // ── Costume Group ─────────────────────────────────────────
-  costumeGroup = new THREE.Group();
-  scene.add(costumeGroup);
-
-  // Build all parts
-  PARTS = PART_DEFS.map(def => {
-    const mesh = buildPartMesh(def);
-    mesh.position.set(def.homeX, def.homeY, def.homeZ);
-    mesh.userData.partId = def.id;
-    costumeGroup.add(mesh);
-    return { def, mesh, visible: true };
-  });
-
-  // ── Events ─────────────────────────────────────────────────
-  canvas.addEventListener('mousedown',  onMouseDown);
-  canvas.addEventListener('mousemove',  onMouseMove);
-  canvas.addEventListener('mouseup',    () => { isDragging = false; });
-  canvas.addEventListener('mouseleave', () => { isDragging = false; });
-  canvas.addEventListener('wheel',      onWheel, { passive: true });
-  canvas.addEventListener('click',      onCanvasClick);
-  // Touch support
-  canvas.addEventListener('touchstart', onTouchStart, { passive: true });
-  canvas.addEventListener('touchmove',  onTouchMove,  { passive: false });
-  canvas.addEventListener('touchend',   () => { isDragging = false; });
-
-  window.addEventListener('resize', onResize);
-
-  // ── Populate UI ────────────────────────────────────────────
-  populateCostumeSelector();
-  populatePartsList();
-
-  // ── Start ──────────────────────────────────────────────────
-  document.getElementById('loading-overlay').style.display = 'none';
-  animate();
-}
-
-// ── Mouse Controls ────────────────────────────────────────────
-function onMouseDown(e) {
-  isDragging = true;
-  prevMouse = { x: e.clientX, y: e.clientY };
-}
-function onMouseMove(e) {
-  if (!isDragging) return;
-  const dx = (e.clientX - prevMouse.x) * 0.012;
-  const dy = (e.clientY - prevMouse.y) * 0.010;
-  rotY += dx;
-  rotX += dy;
-  rotX = Math.max(-1.1, Math.min(1.1, rotX));
-  costumeGroup.rotation.y = rotY;
-  costumeGroup.rotation.x = rotX;
-  prevMouse = { x: e.clientX, y: e.clientY };
-}
-function onWheel(e) {
-  camDist = Math.max(2.5, Math.min(16, camDist + e.deltaY * 0.008));
-}
-
-// Touch
-let lastTouchDist = 0;
-function onTouchStart(e) {
-  if (e.touches.length === 1) {
-    isDragging = true;
-    prevMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-  } else if (e.touches.length === 2) {
-    isDragging = false;
-    lastTouchDist = Math.hypot(
-      e.touches[0].clientX - e.touches[1].clientX,
-      e.touches[0].clientY - e.touches[1].clientY
-    );
-  }
-}
-function onTouchMove(e) {
-  if (e.touches.length === 1 && isDragging) {
-    const dx = (e.touches[0].clientX - prevMouse.x) * 0.015;
-    const dy = (e.touches[0].clientY - prevMouse.y) * 0.012;
-    rotY += dx;
-    rotX = Math.max(-1.1, Math.min(1.1, rotX + dy));
-    costumeGroup.rotation.y = rotY;
-    costumeGroup.rotation.x = rotX;
-    prevMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-  } else if (e.touches.length === 2) {
-    e.preventDefault();
-    const d = Math.hypot(
-      e.touches[0].clientX - e.touches[1].clientX,
-      e.touches[0].clientY - e.touches[1].clientY
-    );
-    camDist = Math.max(2.5, Math.min(16, camDist - (d - lastTouchDist) * 0.02));
-    lastTouchDist = d;
-  }
-}
-
-// ── Click / Raycasting ────────────────────────────────────────
-function onCanvasClick(e) {
-  const canvas = renderer.domElement;
-  const rect = canvas.getBoundingClientRect();
-  mouse.x = ((e.clientX - rect.left) / rect.width)  * 2 - 1;
-  mouse.y = -((e.clientY - rect.top)  / rect.height) * 2 + 1;
-
-  raycaster.setFromCamera(mouse, camera);
-  const hits = raycaster.intersectObjects(costumeGroup.children, true);
-  if (!hits.length) { deselectPart(); return; }
-
-  // Walk up to find the direct child of costumeGroup
-  let obj = hits[0].object;
-  while (obj.parent && obj.parent !== costumeGroup) obj = obj.parent;
-  const partId = obj.userData.partId;
-  if (partId) selectPart(partId);
-}
-
-// ── Resize ────────────────────────────────────────────────────
-function onResize() {
-  const container = document.getElementById('canvas-container');
-  const w = container.clientWidth, h = container.clientHeight;
-  camera.aspect = w / h;
-  camera.updateProjectionMatrix();
-  renderer.setSize(w, h);
-}
-
-// ── Animation Loop ────────────────────────────────────────────
-function animate() {
-  requestAnimationFrame(animate);
-
-  // Smooth explode
-  explodeT += (targetT - explodeT) * 0.055;
-
-  // Camera smooth zoom
-  const targetZ = camDist;
-  camera.position.z += (targetZ - camera.position.z) * 0.08;
-
-  // Auto rotate
-  if (autoRotate && !isDragging) rotY += 0.006;
-  costumeGroup.rotation.y = rotY;
-  costumeGroup.rotation.x = rotX;
-
-  // Update part positions (lerp home → explode)
-  PARTS.forEach(p => {
-    const { def, mesh } = p;
-    const hx = def.homeX + (explodeT > 0 ? def.exX - def.homeX : 0) * explodeT;
-    const hy = def.homeY + (explodeT > 0 ? def.exY - def.homeY : 0) * explodeT;
-    const hz = def.homeZ + (explodeT > 0 ? def.exZ - def.homeZ : 0) * explodeT;
-    mesh.position.set(hx, hy, hz);
-  });
-
-  // Update labels
-  if (labelsVisible) updateLabels();
-
-  renderer.render(scene, camera);
-
-  // FPS counter
-  fpsFrames++;
-  const now = performance.now();
-  if (now - fpsLast >= 1000) {
-    document.getElementById('fps-display').textContent = fpsFrames + ' FPS';
-    fpsFrames = 0; fpsLast = now;
-  }
-}
-
-// ── Select / Deselect Part ────────────────────────────────────
-function selectPart(id) {
-  selectedPartId = id;
-  PARTS.forEach(p => {
-    const highlight = p.def.id === id;
-    p.mesh.children.forEach(child => {
-      if (child.material) {
-        child.material.emissiveIntensity = highlight ? 1.4 : 1;
-        if (highlight) {
-          child.material.emissive = new THREE.Color(0x4d3800);
-        }
-      }
-    });
-  });
-
-  // UI
-  const p = PARTS.find(x => x.def.id === id);
-  if (!p) return;
-  document.getElementById('part-info-empty').style.display = 'none';
-  const content = document.getElementById('part-info-content');
-  content.style.display = 'block';
-
-  document.getElementById('part-color-bar').style.background = `linear-gradient(90deg, ${p.def.colorHex}, transparent)`;
-  document.getElementById('part-emoji').textContent = p.def.emoji;
-  document.getElementById('part-name').textContent = p.def.name;
-  document.getElementById('part-name-en').textContent = p.def.nameEn;
-  document.getElementById('part-desc').textContent = p.def.description;
-  document.getElementById('part-materials').innerHTML = p.def.materials.map(m =>
-    `<span class="v-material-tag">${m}</span>`).join('');
-  document.getElementById('part-stats').innerHTML = `
-    <div class="v-info-stat"><span>Επίπεδο</span><span>${p.def.layer}</span></div>
-    <div class="v-info-stat"><span>Βάρος (εκτ.)</span><span>${p.def.weight}</span></div>
-    <div class="v-info-stat"><span>Ορατό</span><span>${p.visible ? '✓ Ναι' : '✗ Όχι'}</span></div>`;
-
-  // Highlight in parts list
-  document.querySelectorAll('.v-part-item').forEach(el => {
-    el.classList.toggle('active', el.dataset.id === id);
-  });
-}
-
-function deselectPart() {
-  selectedPartId = null;
-  PARTS.forEach(p => p.mesh.children.forEach(child => {
-    if (child.material) {
-      child.material.emissiveIntensity = 1;
-      child.material.emissive = new THREE.Color(p.def.emissiveColor);
-    }
-  }));
-  document.getElementById('part-info-empty').style.display = 'flex';
-  document.getElementById('part-info-content').style.display = 'none';
-  document.querySelectorAll('.v-part-item').forEach(el => el.classList.remove('active'));
-}
-
-// ── Isolate / Show All ────────────────────────────────────────
-function isolatePart() {
-  if (!selectedPartId) return;
-  PARTS.forEach(p => {
-    const show = p.def.id === selectedPartId;
-    p.mesh.visible = show;
-    p.visible = show;
-    refreshPartsListItem(p.def.id);
-  });
-  showToast('Απομόνωση: ' + PARTS.find(x => x.def.id === selectedPartId).def.name);
-}
-
-function showAllParts() {
-  PARTS.forEach(p => { p.mesh.visible = true; p.visible = true; refreshPartsListItem(p.def.id); });
-  showToast('Εμφανίστηκαν όλα τα κομμάτια');
-}
-
-function refreshPartsListItem(id) {
-  const el = document.querySelector(`.v-part-item[data-id="${id}"]`);
-  const p  = PARTS.find(x => x.def.id === id);
-  if (el && p) {
-    el.classList.toggle('hidden-part', !p.visible);
-    const eye = el.querySelector('.v-eye-btn');
-    if (eye) eye.textContent = p.visible ? '👁' : '🚫';
-  }
-}
-
-// ── Explode / Assemble ────────────────────────────────────────
-function setExplode(explode) {
-  isExploded = explode;
-  targetT = explode ? 1 : 0;
-  document.getElementById('btn-explode').disabled  = explode;
-  document.getElementById('btn-assemble').disabled = !explode;
-  document.getElementById('btn-explode').classList.toggle('explode-active', explode);
-  document.getElementById('explode-indicator').style.display = explode ? 'block' : 'none';
-  showToast(explode ? '💥 Διαχωρισμός κομματιών' : '🔧 Συναρμολόγηση φορεσιάς');
-}
-
-// ── Labels ────────────────────────────────────────────────────
-function toggleLabels() {
-  labelsVisible = !labelsVisible;
-  const overlay = document.getElementById('labels-overlay');
-  const btn     = document.getElementById('btn-labels');
-  if (labelsVisible) {
-    overlay.style.display = 'block';
-    btn.classList.add('active');
-    buildLabelEls();
-  } else {
-    overlay.style.display = 'none';
-    overlay.innerHTML = '';
-    btn.classList.remove('active');
-  }
-}
-
-function buildLabelEls() {
-  const overlay = document.getElementById('labels-overlay');
-  overlay.innerHTML = '';
-  PARTS.forEach(p => {
-    const el = document.createElement('div');
-    el.className = 'v-label';
-    el.id = 'label-' + p.def.id;
-    el.innerHTML = `<div class="v-label-line"></div><div class="v-label-text">${p.def.name}</div>`;
-    overlay.appendChild(el);
-    p.labelEl = el;
-  });
-}
-
-function updateLabels() {
-  if (!labelsVisible) return;
-  const canvas    = renderer.domElement;
-  const w = canvas.clientWidth, h = canvas.clientHeight;
-  PARTS.forEach(p => {
-    if (!p.labelEl || !p.mesh.visible) {
-      if (p.labelEl) p.labelEl.style.opacity = '0';
-      return;
-    }
-    // Get world position of mesh center
-    const pos = new THREE.Vector3();
-    p.mesh.getWorldPosition(pos);
-    pos.project(camera);
-    const x = (pos.x  *  0.5 + 0.5) * w;
-    const y = (-pos.y * 0.5 + 0.5) * h;
-    // Only show if in front
-    if (pos.z < 1) {
-      p.labelEl.style.opacity = '1';
-      p.labelEl.style.left = x + 'px';
-      p.labelEl.style.top  = y + 'px';
-    } else {
-      p.labelEl.style.opacity = '0';
-    }
-  });
-}
-
-// ── Camera Reset ──────────────────────────────────────────────
-function resetCamera() {
-  rotX = 0; rotY = 0; camDist = 7;
-  costumeGroup.rotation.set(0, 0, 0);
-  showToast('Camera επαναφέρθηκε');
-}
-
-// ── Scene Toggles ─────────────────────────────────────────────
-function toggleGrid(val)       { gridHelper.visible = val; }
-function toggleAxes(val)       { axesHelper.visible = val; }
-function setAutoRotate(val)    { autoRotate = val; }
-function toggleWireframe(val) {
-  PARTS.forEach(p => p.mesh.children.forEach(child => {
-    if (child.material) child.material.wireframe = val;
-  }));
-}
-
-// ── Eye toggle from parts list ────────────────────────────────
-function togglePartVisibility(id) {
-  const p = PARTS.find(x => x.def.id === id);
-  if (!p) return;
-  p.visible = !p.visible;
-  p.mesh.visible = p.visible;
-  refreshPartsListItem(id);
-}
-
-// ── Screenshot ────────────────────────────────────────────────
-function takeScreenshot() {
-  renderer.render(scene, camera);
-  const url = renderer.domElement.toDataURL('image/png');
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'hellas-heritage-3d.png';
-  a.click();
-  showToast('📸 Screenshot αποθηκεύτηκε!');
-}
-
-// ── Populate UI ───────────────────────────────────────────────
-function populatePartsList() {
-  const list = document.getElementById('parts-list');
-  list.innerHTML = PART_DEFS.map(def => `
-    <div class="v-part-item" data-id="${def.id}" onclick="selectPart('${def.id}')">
-      <div class="v-color-dot" style="background:${def.colorHex}"></div>
-      <span class="v-part-name">${def.emoji} ${def.name}</span>
-      <button class="v-eye-btn" onclick="event.stopPropagation();togglePartVisibility('${def.id}')" title="Εναλλαγή ορατότητας">👁</button>
+// ── Render parts list ────────────────────────────────────
+function renderParts() {
+  const parts = PARTS[currentGender] || [];
+  document.getElementById('parts-count').textContent = parts.length;
+  document.getElementById('parts-list').innerHTML = parts.map(p => `
+    <div class="part-item" id="pi-${p.id}" onclick="selectPart('${p.id}')">
+      <div class="part-dot" style="background:${p.color}"></div>
+      <span class="part-name">${p.icon} ${p.name}</span>
     </div>`).join('');
-  document.getElementById('parts-count').textContent = PART_DEFS.length;
 }
 
-function populateCostumeSelector() {
-  const sel1 = document.getElementById('costume-select-top');
-  const opts = HH.costumes.map(c =>
-    `<option value="${c.id}">${c.name} — ${regionName(c.regionId)}</option>`
-  ).join('');
-  if (sel1) sel1.innerHTML = opts;
+// ── Select a part ────────────────────────────────────────
+function selectPart(id) {
+  const parts  = PARTS[currentGender] || [];
+  const part   = parts.find(p => p.id === id);
+  if (!part) return;
+  currentPart  = id;
+  document.querySelectorAll('.part-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('pi-'+id)?.classList.add('active');
+  showInfo(part);
 }
 
-// ── File Upload (GLTF/GLB) ────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('model-upload').addEventListener('change', function() {
-    const file = this.files[0];
-    if (!file) return;
-    const statusEl   = document.getElementById('upload-status');
-    const progressEl = document.getElementById('upload-progress');
-    const barEl      = document.getElementById('upload-bar');
+// ── Show info panel ──────────────────────────────────────
+function showInfo(part) {
+  document.getElementById('info-empty').style.display = 'none';
+  const ic = document.getElementById('info-content');
+  ic.style.display = 'block';
+  ic.innerHTML = `
+    <div class="info-color-bar" style="background:${part.color}"></div>
+    <span class="info-emoji">${part.icon}</span>
+    <div class="info-name">${part.name}</div>
+    <div class="info-desc">${part.note}</div>
+    ${part.materials.length ? `
+      <div class="info-label">Υλικά</div>
+      <div class="info-tags">${part.materials.map(m=>`<span class="info-tag">${m}</span>`).join('')}</div>` : ''}
+    <div class="info-label" style="margin-top:1.25rem">Πληροφορίες</div>
+    <div class="info-stat"><span>Φύλο</span><span>${currentGender==='ΑΝΔΡΙΚΗ'?'Ανδρική':currentGender==='ΓΥΝΑΙΚΕΙΑ'?'Γυναικεία':currentGender==='ΠΑΙΔΙΚΗ'?'Παιδική':'Μικτή'}</span></div>
+    <div class="info-stat"><span>Τεκμηρίωση</span><span style="color:#C9A030">✦✦✦✦</span></div>
+  `;
+}
 
-    statusEl.textContent = '⏳ Φόρτωση: ' + file.name;
-    progressEl.style.display = 'block';
+function clearInfo() {
+  document.getElementById('info-empty').style.display = 'flex';
+  document.getElementById('info-content').style.display = 'none';
+}
 
-    // Simulate progress (actual GLTF loading needs GLTFLoader which requires import maps)
-    let prog = 0;
-    const interval = setInterval(() => {
-      prog += Math.random() * 18;
-      if (prog >= 100) { prog = 100; clearInterval(interval); }
-      barEl.style.width = prog + '%';
-      if (prog >= 100) {
-        statusEl.textContent = '✅ ' + file.name + ' φορτώθηκε!';
-        showToast('✅ Μοντέλο φορτώθηκε: ' + file.name);
-        // In production: use THREE.GLTFLoader to actually load the model
-        // const loader = new GLTFLoader();
-        // const url = URL.createObjectURL(file);
-        // loader.load(url, (gltf) => { scene.add(gltf.scene); });
-        showToast('💡 Σημείωση: Για πλήρη GLTF φόρτωση, χρειάζεται server environment');
-      }
-    }, 120);
+// ── Load model into model-viewer ──────────────────────────
+function loadModel(src) {
+  mv.src = src;
+}
+
+// ── model-viewer controls ────────────────────────────────
+function mvReset() { mv.cameraOrbit = '0deg 75deg 105%'; mv.fieldOfView = '45deg'; }
+function mvToggleRotate(btn) {
+  const on = btn.classList.toggle('active');
+  mv.autoRotate = on;
+}
+function mvToggleAnnotations(btn) {
+  annotationsOn = btn.classList.toggle('active');
+  document.querySelectorAll('[data-hotspot]').forEach(h => {
+    h.style.display = annotationsOn ? '' : 'none';
   });
+}
+let wireOn = false;
+function mvWireframe(btn) {
+  wireOn = !wireOn;
+  btn.classList.toggle('active', wireOn);
+  // model-viewer doesn't have native wireframe; toggle exposure as visual cue
+  mv.exposure = wireOn ? 0.3 : 1.1;
+  showToast(wireOn ? 'Wireframe mode ενεργό' : 'Wireframe mode ανενεργό');
+}
 
-  // Init the 3D scene after DOM is ready
-  initScene();
+// ── Lighting presets ────────────────────────────────────
+function setLight(preset, btn) {
+  document.querySelectorAll('.light-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  mv.environmentImage = preset === 'night' ? 'legacy' : preset;
+  mv.exposure = { neutral:1.1, legacy:1.0, commerce:1.3, dawn:0.85, night:0.5 }[preset] || 1.0;
+}
+
+// ── Upload custom GLB ────────────────────────────────────
+function loadCustomGLB(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const status = document.getElementById('upload-status');
+  status.textContent = '⏳ Φόρτωση…';
+  const url = URL.createObjectURL(file);
+  mv.src = url;
+  mv.addEventListener('load', () => { status.textContent = '✅ Φορτώθηκε: ' + file.name; }, { once: true });
+  mv.addEventListener('error', () => { status.textContent = '❌ Σφάλμα φόρτωσης'; }, { once: true });
+}
+
+// ── Init ────────────────────────────────────────────────
+window.__HH_READY.then(() => {
+  renderParts();
+  // Try to load from URL param
+  const id = parseInt(getParam('costumeId'));
+  const gender = getParam('gender') || 'ΑΝΔΡΙΚΗ';
+  if (gender && PARTS[gender]) {
+    currentGender = gender;
+    document.querySelectorAll('.gender-tab').forEach(t => {
+      t.classList.toggle('active', t.dataset.gender === gender);
+    });
+    renderParts();
+  }
+  loadModel(GLB_URLS[currentGender]);
+});
+
+// model-viewer progress
+mv.addEventListener('progress', e => {
+  if (e.detail.totalProgress === 1) {
+    document.getElementById('mv-hint').textContent = 'Drag να περιστρέψεις · Pinch zoom · 📱 AR';
+  }
 });
 </script>
 </body>

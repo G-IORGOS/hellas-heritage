@@ -1,245 +1,340 @@
--- ══════════════════════════════════════════════════════════
---  HELLAS HERITAGE — Supabase Schema + Sample Data
---  Τρέξε αυτό στο: Supabase → SQL Editor → New query
--- ══════════════════════════════════════════════════════════
+-- ══════════════════════════════════════════════════════════════════════
+--  HELLAS HERITAGE v2.0 — Expanded Supabase Schema
+--  Τρέξε στο: Supabase → SQL Editor → New query
+--  Νέοι πίνακες: authors, sources, bibliography, media_assets,
+--                translations, profiles, favorites, subscriptions
+-- ══════════════════════════════════════════════════════════════════════
 
--- ── TABLES ────────────────────────────────────────────────
+-- Enable UUID extension
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-create table if not exists regions (
-  id int primary key,
-  name text not null,
-  name_en text,
-  type text,
-  slug text unique,
-  description text,
-  description_en text,
-  image text,
-  lat numeric,
-  lng numeric,
-  costumes_count int default 0,
-  customs_count int default 0,
-  featured boolean default false
+-- ══════════════════════════════════════════════════════════════════════
+--  CORE TABLES
+-- ══════════════════════════════════════════════════════════════════════
+
+-- Authors / Curators
+CREATE TABLE IF NOT EXISTS authors (
+  id          SERIAL PRIMARY KEY,
+  name        TEXT NOT NULL,
+  name_en     TEXT,
+  title       TEXT,                     -- π.χ. "Δρ. Λαογραφίας"
+  institution TEXT,                     -- π.χ. "Πανεπιστήμιο Αθηνών"
+  bio         TEXT,
+  avatar_url  TEXT,
+  email       TEXT,
+  created_at  TIMESTAMPTZ DEFAULT NOW()
 );
 
-create table if not exists costumes (
-  id int primary key,
-  name text not null,
-  name_en text,
-  slug text unique,
-  region_id int references regions(id),
-  gender text,
-  period text,
-  occasion text,
-  materials text[],
-  colors text[],
-  description text,
-  symbolism text,
-  image text,
-  is_premium boolean default false,
-  featured boolean default false
+-- Regions
+CREATE TABLE IF NOT EXISTS regions (
+  id              SERIAL PRIMARY KEY,
+  name            TEXT NOT NULL,
+  name_en         TEXT,
+  type            TEXT CHECK (type IN ('ηπειρος','νησι','νομος','πολη')),
+  slug            TEXT UNIQUE NOT NULL,
+  description     TEXT,
+  description_en  TEXT,
+  image           TEXT,
+  lat             NUMERIC(9,6),
+  lng             NUMERIC(9,6),
+  costumes_count  INTEGER DEFAULT 0,
+  customs_count   INTEGER DEFAULT 0,
+  featured        BOOLEAN DEFAULT FALSE,
+  created_at      TIMESTAMPTZ DEFAULT NOW()
 );
 
-create table if not exists customs (
-  id int primary key,
-  name text not null,
-  name_en text,
-  slug text unique,
-  region_id int references regions(id),
-  category text,
-  period_of_year text,
-  description text,
-  image text,
-  is_premium boolean default false,
-  featured boolean default false
+-- Costumes (φορεσιές)
+CREATE TABLE IF NOT EXISTS costumes (
+  id              SERIAL PRIMARY KEY,
+  name            TEXT NOT NULL,
+  name_en         TEXT,
+  slug            TEXT UNIQUE NOT NULL,
+  region_id       INTEGER REFERENCES regions(id),
+  author_id       INTEGER REFERENCES authors(id),
+  gender          TEXT CHECK (gender IN ('ΑΝΔΡΙΚΗ','ΓΥΝΑΙΚΕΙΑ','ΠΑΙΔΙΚΗ','ΜΙΚΤΗ')),
+  period          TEXT,                  -- π.χ. "18ος–19ος αιώνας"
+  occasion        TEXT,
+  materials       TEXT[] DEFAULT '{}',
+  colors          TEXT[] DEFAULT '{}',
+  description     TEXT,
+  description_en  TEXT,
+  symbolism       TEXT,
+  symbolism_en    TEXT,
+  curator_note    TEXT,                  -- ✨ Νέο: σχόλιο curator
+  reliability     SMALLINT DEFAULT 3 CHECK (reliability BETWEEN 1 AND 5), -- ✨ ✦ rating
+  image           TEXT,
+  model_glb_url   TEXT,                  -- ✨ URL σε GLB αρχείο για 3D viewer
+  is_premium      BOOLEAN DEFAULT FALSE,
+  featured        BOOLEAN DEFAULT FALSE,
+  created_at      TIMESTAMPTZ DEFAULT NOW(),
+  updated_at      TIMESTAMPTZ DEFAULT NOW()
 );
 
-create table if not exists events (
-  id int primary key,
-  name text not null,
-  name_en text,
-  slug text,
-  type text,
-  date text,
-  location text,
-  description text,
-  image text,
-  website text
+-- Customs (έθιμα)
+CREATE TABLE IF NOT EXISTS customs (
+  id              SERIAL PRIMARY KEY,
+  name            TEXT NOT NULL,
+  name_en         TEXT,
+  slug            TEXT UNIQUE NOT NULL,
+  region_id       INTEGER REFERENCES regions(id),
+  author_id       INTEGER REFERENCES authors(id),
+  category        TEXT CHECK (category IN ('ΓΑΜΗΛΙΟ','ΘΡΗΣΚΕΥΤΙΚΟ','ΑΓΡΟΤΙΚΟ','ΕΠΟΧΙΑΚΟ','ΚΟΙΝΩΝΙΚΟ','ΕΠΕΤΕΙΑΚΟ')),
+  period_of_year  TEXT,
+  description     TEXT,
+  description_en  TEXT,
+  curator_note    TEXT,
+  reliability     SMALLINT DEFAULT 3 CHECK (reliability BETWEEN 1 AND 5),
+  image           TEXT,
+  is_premium      BOOLEAN DEFAULT FALSE,
+  featured        BOOLEAN DEFAULT FALSE,
+  created_at      TIMESTAMPTZ DEFAULT NOW()
 );
 
--- ── ROW LEVEL SECURITY (public read) ─────────────────────
+-- Events (εκδηλώσεις)
+CREATE TABLE IF NOT EXISTS events (
+  id          SERIAL PRIMARY KEY,
+  name        TEXT NOT NULL,
+  name_en     TEXT,
+  slug        TEXT UNIQUE,
+  type        TEXT,
+  date        TEXT,
+  location    TEXT,
+  lat         NUMERIC(9,6),
+  lng         NUMERIC(9,6),
+  description TEXT,
+  image       TEXT,
+  website     TEXT,
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
 
-alter table regions enable row level security;
-alter table costumes enable row level security;
-alter table customs enable row level security;
-alter table events enable row level security;
+-- ══════════════════════════════════════════════════════════════════════
+--  NEW: CONTENT CREDIBILITY TABLES
+-- ══════════════════════════════════════════════════════════════════════
 
-create policy "Public read regions" on regions for select using (true);
-create policy "Public read costumes" on costumes for select using (true);
-create policy "Public read customs" on customs for select using (true);
-create policy "Public read events" on events for select using (true);
+-- Bibliography / Sources
+CREATE TABLE IF NOT EXISTS bibliography (
+  id            SERIAL PRIMARY KEY,
+  costume_id    INTEGER REFERENCES costumes(id) ON DELETE CASCADE,
+  custom_id     INTEGER REFERENCES customs(id)  ON DELETE CASCADE,
+  author_names  TEXT NOT NULL,            -- π.χ. "Πολίτης Ν., 1931"
+  title         TEXT NOT NULL,
+  publisher     TEXT,
+  year          SMALLINT,
+  url           TEXT,
+  doi           TEXT,
+  source_type   TEXT CHECK (source_type IN ('βιβλίο','άρθρο','αρχείο','μουσείο','προφορική_μαρτυρία','διαδίκτυο')),
+  notes         TEXT,
+  created_at    TIMESTAMPTZ DEFAULT NOW()
+);
 
--- ── DATA: REGIONS ─────────────────────────────────────────
+-- Media Assets (φωτογραφικά credits)
+CREATE TABLE IF NOT EXISTS media_assets (
+  id            SERIAL PRIMARY KEY,
+  costume_id    INTEGER REFERENCES costumes(id) ON DELETE CASCADE,
+  custom_id     INTEGER REFERENCES customs(id)  ON DELETE CASCADE,
+  region_id     INTEGER REFERENCES regions(id)  ON DELETE CASCADE,
+  url           TEXT NOT NULL,
+  thumbnail_url TEXT,
+  alt_el        TEXT,
+  alt_en        TEXT,
+  photographer  TEXT,                     -- όνομα φωτογράφου
+  source        TEXT,                     -- π.χ. "Μουσείο Μπενάκη"
+  license       TEXT DEFAULT 'CC BY-NC 4.0',
+  year          SMALLINT,
+  is_primary    BOOLEAN DEFAULT FALSE,
+  sort_order    INTEGER DEFAULT 0,
+  created_at    TIMESTAMPTZ DEFAULT NOW()
+);
 
-insert into regions (id, name, name_en, type, slug, description, description_en, image, lat, lng, costumes_count, customs_count, featured) values
-(1, 'Μακεδονία', 'Macedonia', 'ηπειρος', 'makedonia',
- 'Η Μακεδονία είναι η μεγαλύτερη γεωγραφική περιοχή της Ελλάδας με πλούσια πολιτιστική κληρονομιά, χαρακτηριστικές φορεσιές με έντονα κεντήματα και παραδόσεις που χρονολογούνται από την αρχαιότητα.',
- 'Macedonia is the largest geographical region of Greece with rich cultural heritage.',
- 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800', 40.6401, 22.9444, 12, 18, true),
+-- Translations (bilingual content — EL + EN)
+CREATE TABLE IF NOT EXISTS translations (
+  id          SERIAL PRIMARY KEY,
+  table_name  TEXT NOT NULL,             -- π.χ. 'costumes'
+  record_id   INTEGER NOT NULL,
+  locale      TEXT NOT NULL DEFAULT 'en',
+  field       TEXT NOT NULL,             -- π.χ. 'description'
+  value       TEXT NOT NULL,
+  created_at  TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(table_name, record_id, locale, field)
+);
 
-(2, 'Θράκη', 'Thrace', 'ηπειρος', 'thraki',
- 'Η Θράκη αποτελεί σταυροδρόμι πολιτισμών. Τα έθιμά της, όπως το Αναστενάρια και το Δρομένο, είναι μοναδικά στον κόσμο και έχουν ενταχθεί στην άυλη πολιτιστική κληρονομιά της UNESCO.',
- 'Thrace is a crossroads of civilizations. Its customs such as the Anastenaria are unique worldwide.',
- 'https://images.unsplash.com/photo-1519451241324-20b4ea2c4220?w=800', 41.1496, 25.4016, 8, 22, true),
+-- ══════════════════════════════════════════════════════════════════════
+--  NEW: USER / SUBSCRIPTION TABLES
+-- ══════════════════════════════════════════════════════════════════════
 
-(3, 'Ήπειρος', 'Epirus', 'ηπειρος', 'ipeiros',
- 'Η Ήπειρος με τα απόκρημνα βουνά της και τα αρχαία Ζαγοροχώρια διατηρεί ζωντανές παραδόσεις αιώνων. Οι φορεσιές της με τα χρυσοκέντητα είναι από τις πιο εντυπωσιακές στην Ελλάδα.',
- 'Epirus with its rugged mountains and ancient Zagori villages preserves centuries-old traditions.',
- 'https://images.unsplash.com/photo-1571863533956-01c88e79957e?w=800', 39.6650, 20.8536, 10, 15, true),
+-- User profiles (linked to Supabase Auth)
+CREATE TABLE IF NOT EXISTS profiles (
+  id              UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  display_name    TEXT,
+  avatar_url      TEXT,
+  role            TEXT DEFAULT 'free' CHECK (role IN ('free','premium','educator','admin')),
+  institution     TEXT,                  -- για teacher accounts
+  subscription_id TEXT,                  -- Stripe subscription ID
+  subscription_ends_at TIMESTAMPTZ,
+  created_at      TIMESTAMPTZ DEFAULT NOW(),
+  updated_at      TIMESTAMPTZ DEFAULT NOW()
+);
 
-(4, 'Πελοπόννησος', 'Peloponnese', 'ηπειρος', 'peloponisos',
- 'Η Πελοπόννησος, γη ηρώων και μυστηρίων, αποτελεί την καρδιά της αρχαίας ελληνικής ιστορίας.',
- 'The Peloponnese, land of heroes and mysteries, is the heart of ancient Greek history.',
- 'https://images.unsplash.com/photo-1555993539-1732b0258235?w=800', 37.5079, 22.3731, 9, 14, false),
+-- Subscriptions log
+CREATE TABLE IF NOT EXISTS subscriptions (
+  id              SERIAL PRIMARY KEY,
+  user_id         UUID REFERENCES profiles(id),
+  plan            TEXT CHECK (plan IN ('free','klironomos','educator')),
+  status          TEXT CHECK (status IN ('active','cancelled','expired','trialing')),
+  stripe_id       TEXT,
+  started_at      TIMESTAMPTZ DEFAULT NOW(),
+  ends_at         TIMESTAMPTZ,
+  created_at      TIMESTAMPTZ DEFAULT NOW()
+);
 
-(5, 'Κρήτη', 'Crete', 'νησι', 'kriti',
- 'Η Κρήτη έχει τη δική της ξεχωριστή κουλτούρα και ταυτότητα. Η κρητική φορεσιά — ιδιαίτερα η ανδρική με τις βράκες — είναι αναγνωρίσιμη σε όλο τον κόσμο ως σύμβολο της κρητικής υπερηφάνειας.',
- 'Crete has its own distinct culture. The Cretan vraka breeches are recognized worldwide.',
- 'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=800', 35.2401, 24.8093, 14, 25, true),
+-- Favorites
+CREATE TABLE IF NOT EXISTS favorites (
+  id          SERIAL PRIMARY KEY,
+  user_id     UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  costume_id  INTEGER REFERENCES costumes(id) ON DELETE CASCADE,
+  custom_id   INTEGER REFERENCES customs(id)  ON DELETE CASCADE,
+  region_id   INTEGER REFERENCES regions(id)  ON DELETE CASCADE,
+  created_at  TIMESTAMPTZ DEFAULT NOW(),
+  CHECK (
+    (costume_id IS NOT NULL)::INT +
+    (custom_id  IS NOT NULL)::INT +
+    (region_id  IS NOT NULL)::INT = 1
+  )
+);
 
-(6, 'Κυκλάδες', 'Cyclades', 'νησι', 'kyklades',
- 'Τα νησιά των Κυκλάδων με τη χαρακτηριστική τους λευκή αρχιτεκτονική κρύβουν πλούσιες παραδόσεις.',
- 'The Cycladic islands with their characteristic white architecture hide rich traditions.',
- 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=800', 37.1543, 25.2686, 11, 16, false),
+-- Download history (PDFs, GLB files)
+CREATE TABLE IF NOT EXISTS downloads (
+  id          SERIAL PRIMARY KEY,
+  user_id     UUID REFERENCES profiles(id),
+  asset_type  TEXT CHECK (asset_type IN ('pdf','glb','image')),
+  asset_id    INTEGER,
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
 
-(7, 'Δωδεκάνησα', 'Dodecanese', 'νησι', 'dodekanisa',
- 'Τα Δωδεκάνησα, λόγω της πολυτάραχης ιστορίας τους, έχουν αναπτύξει μοναδικές παραδόσεις.',
- 'The Dodecanese have developed unique traditions due to their turbulent history.',
- 'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?w=800', 36.4341, 28.2176, 7, 12, false),
+-- ══════════════════════════════════════════════════════════════════════
+--  VIEWS
+-- ══════════════════════════════════════════════════════════════════════
 
-(8, 'Ιόνια Νησιά', 'Ionian Islands', 'νησι', 'ionia-nisia',
- 'Τα Επτάνησα με τη βενετική επίδραση έχουν ανεπτύξει μια μοναδική ελληνική κουλτούρα.',
- 'The Ionian Islands with Venetian influence have developed a unique Greek culture.',
- 'https://images.unsplash.com/photo-1590012314607-cda9d9b699ae?w=800', 38.1747, 20.4907, 8, 13, false);
+-- Costumes with region name & author
+CREATE OR REPLACE VIEW costumes_full AS
+SELECT
+  c.*,
+  r.name        AS region_name,
+  r.name_en     AS region_name_en,
+  r.slug        AS region_slug,
+  a.name        AS author_name,
+  a.title       AS author_title,
+  a.institution AS author_institution
+FROM costumes c
+LEFT JOIN regions r ON r.id = c.region_id
+LEFT JOIN authors a ON a.id = c.author_id;
 
--- ── DATA: COSTUMES ────────────────────────────────────────
+-- Customs with region name & author
+CREATE OR REPLACE VIEW customs_full AS
+SELECT
+  cu.*,
+  r.name    AS region_name,
+  r.slug    AS region_slug,
+  a.name    AS author_name
+FROM customs cu
+LEFT JOIN regions r ON r.id = cu.region_id
+LEFT JOIN authors a ON a.id = cu.author_id;
 
-insert into costumes (id, name, name_en, slug, region_id, gender, period, occasion, materials, colors, description, symbolism, image, is_premium, featured) values
-(1, 'Φορεσιά Αμαλία', 'Amalia Dress', 'foresia-amalia', 1, 'ΓΥΝΑΙΚΕΙΑ', '1836 - σήμερα',
- 'Επίσημες εθνικές εορτές, γάμοι, παρελάσεις',
- ARRAY['μετάξι','βελούδο','χρυσονήματα','δαντέλα'],
- ARRAY['κόκκινο','μπλε','χρυσό'],
- 'Η φορεσιά Αμαλία πήρε το όνομά της από την πρώτη βασίλισσα της σύγχρονης Ελλάδας, Αμαλία του Όλντενμπουργκ. Εισήχθη ως η επίσημη ελληνική εθνική φορεσιά για γυναίκες κατά τον 19ο αιώνα.',
- 'Τα χρώματά της αντικατοπτρίζουν τη βυζαντινή παράδοση και την ελληνική εθνική ταυτότητα.',
- 'https://images.unsplash.com/photo-1594387303756-0c25e8f7b97a?w=600', false, true),
+-- ══════════════════════════════════════════════════════════════════════
+--  ROW LEVEL SECURITY
+-- ══════════════════════════════════════════════════════════════════════
 
-(2, 'Κρητική Βράκα (Ανδρική)', 'Cretan Vraka', 'kritiki-vraka', 5, 'ΑΝΔΡΙΚΗ', '17ος αιώνας - σήμερα',
- 'Καθημερινή χρήση στην Κρήτη, εορτές, πανηγύρια',
- ARRAY['μαύρο ύφασμα (σέρτζι)','ύφασμα βελούδο','δέρμα (μπότες)'],
- ARRAY['μαύρο','λευκό'],
- 'Η κρητική ανδρική φορεσιά με τη χαρακτηριστική βράκα (πλατύ παντελόνι) και τη μαύρη κρητική μαντίλα είναι ένα από τα πιο αναγνωρίσιμα σύμβολα της Κρήτης.',
- 'Το μαύρο χρώμα αντιπροσωπεύει το πένθος για την τελευταία κρητική επανάσταση.',
- 'https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?w=600', false, true),
+ALTER TABLE profiles      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE favorites     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE subscriptions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE downloads     ENABLE ROW LEVEL SECURITY;
 
-(3, 'Σαρακατσάνα Φορεσιά', 'Sarakatsani Costume', 'sarakatsana', 1, 'ΓΥΝΑΙΚΕΙΑ', '18ος - 20ός αιώνας',
- 'Γάμοι, πανηγύρια Σαρακατσάνων',
- ARRAY['μαλλί','βαμβάκι','ασημένια κοσμήματα'],
- ARRAY['άσπρο','μαύρο','κόκκινο'],
- 'Οι Σαρακατσάνοι ήταν νομαδικοί κτηνοτρόφοι της βόρειας Ελλάδας. Η φορεσιά τους χαρακτηρίζεται από πλούσια χρωματιστά κεντήματα.',
- 'Κάθε μοτίβο στα κεντήματα έχει συγκεκριμένο νόημα: ο ήλιος για ζωή, το δέντρο για γονιμότητα.',
- 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=600', true, true),
+-- Profiles: users can only read/update their own
+CREATE POLICY "Users see own profile"
+  ON profiles FOR SELECT USING (auth.uid() = id);
+CREATE POLICY "Users update own profile"
+  ON profiles FOR UPDATE USING (auth.uid() = id);
 
-(4, 'Θρακιώτικη Φορεσιά', 'Thracian Costume', 'thrakiotiki', 2, 'ΓΥΝΑΙΚΕΙΑ', '19ος αιώνας',
- 'Γάμοι, θρησκευτικές εορτές',
- ARRAY['μετάξι','χρυσοκλωστή','ασήμι'],
- ARRAY['σκούρο κόκκινο','πράσινο','χρυσό','μαύρο'],
- 'Η θρακιώτικη γυναικεία φορεσιά είναι γνωστή για τα εξαιρετικά πολύχρωμα κεντήματα και τα πολλαπλά στρώματα.',
- 'Τα γεωμετρικά μοτίβα αντικατοπτρίζουν αρχαία σύμβολα γονιμότητας και προστασίας.',
- 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=600', true, false),
+-- Favorites: users manage their own
+CREATE POLICY "Users see own favorites"
+  ON favorites FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users insert favorites"
+  ON favorites FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users delete favorites"
+  ON favorites FOR DELETE USING (auth.uid() = user_id);
 
-(5, 'Ηπειρώτικη Φορεσιά', 'Epiriot Costume', 'ipeirotiki', 3, 'ΓΥΝΑΙΚΕΙΑ', '18ος - 19ος αιώνας',
- 'Γάμοι, Απόκριες, πανηγύρια',
- ARRAY['μαλλί','μετάξι','χρυσονήματα','ασημένιες ζώνες'],
- ARRAY['σκούρο μπλε','μαύρο','χρυσό'],
- 'Η ηπειρώτικη φορεσιά ξεχωρίζει για τις εντυπωσιακές χρυσόκλωστες ζώνες και τα πλούσια κεντήματα.',
- 'Η ασημένια ζώνη αντικατοπτρίζει την οικονομική κατάσταση της οικογένειας.',
- 'https://images.unsplash.com/photo-1604176354204-9268737828e4?w=600', false, false),
+-- Public read on content tables
+CREATE POLICY "Public read regions"   ON regions    FOR SELECT USING (true);
+CREATE POLICY "Public read costumes"  ON costumes   FOR SELECT USING (true);
+CREATE POLICY "Public read customs"   ON customs    FOR SELECT USING (true);
+CREATE POLICY "Public read events"    ON events     FOR SELECT USING (true);
+CREATE POLICY "Public read authors"   ON authors    FOR SELECT USING (true);
+CREATE POLICY "Public read biblio"    ON bibliography FOR SELECT USING (true);
+CREATE POLICY "Public read media"     ON media_assets FOR SELECT USING (true);
 
-(6, 'Τσολιάς (Εύζωνας)', 'Tsolias (Evzone)', 'tsolias-evzonas', 1, 'ΑΝΔΡΙΚΗ', '18ος αιώνας - σήμερα',
- 'Εθνικές εορτές, παρελάσεις, Αλλαγή Φρουράς',
- ARRAY['λευκό λινό (φουστανέλα)','κόκκινο βελούδο','δέρμα'],
- ARRAY['λευκό','κόκκινο','μπλε'],
- 'Η φορεσιά του Τσολιά (Εύζωνα) με τη φουστανέλα των 400 πτυχών είναι το πιο διεθνώς αναγνωρισμένο ελληνικό σύμβολο.',
- 'Οι 400 πτυχές = 400 χρόνια Οθωμανικής κατοχής. Η κόκκινη τζακέτα συμβολίζει το αίμα των αγωνιστών.',
- 'https://images.unsplash.com/photo-1555993539-1732b0258235?w=600', false, true),
+ALTER TABLE regions     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE costumes    ENABLE ROW LEVEL SECURITY;
+ALTER TABLE customs     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE events      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE authors     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bibliography ENABLE ROW LEVEL SECURITY;
+ALTER TABLE media_assets ENABLE ROW LEVEL SECURITY;
 
-(7, 'Κυκλαδίτικη Φορεσιά', 'Cycladic Costume', 'kykladitiki', 6, 'ΓΥΝΑΙΚΕΙΑ', '17ος - 19ος αιώνας',
- 'Γάμοι, θρησκευτικές γιορτές',
- ARRAY['μετάξι','χρυσοκλωστή','δαντέλα'],
- ARRAY['λευκό','χρυσό','γαλάζιο'],
- 'Η κυκλαδίτικη φορεσιά διαφέρει από νησί σε νησί, αλλά μοιράζεται κοινά χαρακτηριστικά: λευκά και χρυσά χρώματα.',
- 'Το λευκό χρώμα αντιπροσωπεύει την αγνότητα και τη θάλασσα.',
- 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600', true, false),
+-- ══════════════════════════════════════════════════════════════════════
+--  INDEXES
+-- ══════════════════════════════════════════════════════════════════════
 
-(8, 'Μακεδόνικη Ανδρική Φορεσιά', 'Macedonian Male Costume', 'makedoniki-andrika', 1, 'ΑΝΔΡΙΚΗ', '18ος - 19ος αιώνας',
- 'Γάμοι, πανηγύρια, εθνικές εορτές',
- ARRAY['μαύρο ύφασμα','ασήμι','χρυσονήματα'],
- ARRAY['μαύρο','λευκό','ασημί'],
- 'Η βόρεια μακεδόνικη ανδρική φορεσιά χαρακτηρίζεται από τον μαύρο γκλαμπούρ με πλούσια ασημένια κεντήματα.',
- 'Τα ασημένια κεντήματα στον γκλαμπούρ δείχνουν την κοινωνική θέση του άνδρα.',
- 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600', true, false);
+CREATE INDEX IF NOT EXISTS idx_costumes_region  ON costumes(region_id);
+CREATE INDEX IF NOT EXISTS idx_costumes_gender  ON costumes(gender);
+CREATE INDEX IF NOT EXISTS idx_costumes_premium ON costumes(is_premium);
+CREATE INDEX IF NOT EXISTS idx_costumes_featured ON costumes(featured);
+CREATE INDEX IF NOT EXISTS idx_customs_region   ON customs(region_id);
+CREATE INDEX IF NOT EXISTS idx_customs_category ON customs(category);
+CREATE INDEX IF NOT EXISTS idx_favorites_user   ON favorites(user_id);
+CREATE INDEX IF NOT EXISTS idx_bibliography_costume ON bibliography(costume_id);
+CREATE INDEX IF NOT EXISTS idx_bibliography_custom  ON bibliography(custom_id);
+CREATE INDEX IF NOT EXISTS idx_media_costume    ON media_assets(costume_id);
+CREATE INDEX IF NOT EXISTS idx_media_custom     ON media_assets(custom_id);
+CREATE INDEX IF NOT EXISTS idx_translations_ref ON translations(table_name, record_id, locale);
 
--- ── DATA: CUSTOMS ─────────────────────────────────────────
+-- Full-text search (Greek + English)
+CREATE INDEX IF NOT EXISTS idx_costumes_fts ON costumes
+  USING gin(to_tsvector('simple', coalesce(name,'') || ' ' || coalesce(description,'')));
+CREATE INDEX IF NOT EXISTS idx_customs_fts ON customs
+  USING gin(to_tsvector('simple', coalesce(name,'') || ' ' || coalesce(description,'')));
 
-insert into customs (id, name, name_en, slug, region_id, category, period_of_year, description, image, is_premium, featured) values
-(1, 'Αναστενάρια', 'Anastenaria Fire-Walking', 'anastenaria', 2, 'ΘΡΗΣΚΕΥΤΙΚΟ',
- '21 Μαΐου (Αγίου Κωνσταντίνου)',
- 'Τα Αναστενάρια είναι ένα από τα πιο εντυπωσιακά και μυστηριακά έθιμα της Ελλάδας. Οι Αναστενάρηδες περπατούν ξυπόλητοι σε αναμμένα κάρβουνα κρατώντας εικόνες των Αγίων Κωνσταντίνου και Ελένης.',
- 'https://images.unsplash.com/photo-1504192010706-dd7f569ee2be?w=600', false, true),
+-- ══════════════════════════════════════════════════════════════════════
+--  SAMPLE DATA — Authors
+-- ══════════════════════════════════════════════════════════════════════
 
-(2, 'Κρητικός Γάμος', 'Cretan Wedding', 'kritikos-gamos', 5, 'ΓΑΜΗΛΙΟ',
- 'Κυρίως καλοκαίρι',
- 'Ο κρητικός γάμος είναι ένα πολυήμερο γεγονός που ξεκινά από Παρασκευή και τελειώνει Κυριακή. Χαρακτηρίζεται από λυράρηδες, ριζίτικα τραγούδια και το έθιμο της βράκας για τον γαμπρό.',
- 'https://images.unsplash.com/photo-1520854221256-17451cc331bf?w=600', false, true),
+INSERT INTO authors (name, name_en, title, institution) VALUES
+  ('Δρ. Αγγελική Χατζημιχάλη', 'Dr. Angeliki Chatzimichali', 'Δρ. Λαογραφίας', 'Πανεπιστήμιο Αθηνών'),
+  ('Νικόλαος Πολίτης', 'Nikolaos Politis', 'Καθηγητής Λαογραφίας', 'Πανεπιστήμιο Αθηνών'),
+  ('Δρ. Ευγενία Δρακοπούλου', 'Dr. Evgenia Drakopoulou', 'Ιστορικός Τέχνης', 'Μουσείο Μπενάκη')
+ON CONFLICT DO NOTHING;
 
-(3, 'Μαμλαρόι (Καρναβάλι Νάουσας)', 'Mamlaro (Naoussa Carnival)', 'mamlaroi-naousa', 1, 'ΕΠΟΧΙΑΚΟ',
- 'Αποκριές (Φεβρουάριος - Μάρτιος)',
- 'Το Καρναβάλι της Νάουσας είναι ένα από τα παλαιότερα και εντυπωσιακότερα της Ελλάδας. Οι Γενίτσαροι και οι Μπούλες με τις παραδοσιακές τους στολές χορεύουν στους δρόμους της πόλης.',
- 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=600', true, true),
+-- ══════════════════════════════════════════════════════════════════════
+--  TRIGGER: auto-update updated_at on costumes
+-- ══════════════════════════════════════════════════════════════════════
 
-(4, 'Κλήδονας', 'Klidonas', 'klidonas', 6, 'ΕΠΟΧΙΑΚΟ',
- '23 Ιουνίου (Παραμονή Ιωάννη)',
- 'Ο Κλήδονας είναι ένα αρχαίο έθιμο μαντείας που γίνεται στη φωτιά της Αγιαννιώτικης νύχτας. Τα κορίτσια ρίχνουν τα αντικείμενά τους σε αγγείο με αμίλητο νερό.',
- 'https://images.unsplash.com/photo-1516912481808-3406841bd33c?w=600', false, false),
+CREATE OR REPLACE FUNCTION update_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN NEW.updated_at = NOW(); RETURN NEW; END;
+$$ LANGUAGE plpgsql;
 
-(5, 'Πατινάδα Κέρκυρας', 'Serenata of Corfu', 'patinada-kerkyra', 8, 'ΚΟΙΝΩΝΙΚΟ',
- 'Απόκριες (Κυρίαρχα)',
- 'Η Πατινάδα είναι το κερκυραϊκό έθιμο της σερενάτας, βενετικής καταγωγής. Ομάδες ανδρών περπατούν στα σοκάκια της Κέρκυρας τραγουδώντας καντάδες κάτω από τα παράθυρα αγαπημένων.',
- 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600', true, false),
+CREATE TRIGGER costumes_updated_at
+  BEFORE UPDATE ON costumes
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
-(6, 'Ηπειρώτικος Γάμος', 'Epiriot Wedding', 'ipeirotikos-gamos', 3, 'ΓΑΜΗΛΙΟ',
- 'Φθινόπωρο - Χειμώνας',
- 'Ο παραδοσιακός ηπειρώτικος γάμος διαρκεί 3-5 μέρες και έχει αυστηρά τελετουργικά βήματα που κληρονομήθηκαν από τον Μεσαίωνα. Τα κλαρίνα κατέχουν κεντρική θέση σε κάθε τελετή.',
- 'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=600', false, true);
-
--- ── DATA: EVENTS ──────────────────────────────────────────
-
-insert into events (id, name, name_en, slug, type, date, location, description, image, website) values
-(1, 'Καρναβάλι Πάτρας', 'Patras Carnival', 'karnavali-patras', 'ΦΕΣΤΙΒΑΛ',
- 'Φεβρουάριος - Μάρτιος 2026', 'Πάτρα, Αχαΐα',
- 'Το μεγαλύτερο καρναβάλι της Ελλάδας και ένα από τα μεγαλύτερα της Ευρώπης.',
- 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=600', 'https://www.carnivalpatras.gr'),
-
-(2, 'Φεστιβάλ Παραδοσιακής Μουσικής Σερρών', 'Serres Traditional Music Festival', 'festival-serron', 'ΦΕΣΤΙΒΑΛ',
- 'Ιούλιος 2026', 'Σέρρες, Μακεδονία',
- 'Τριήμερο φεστιβάλ παραδοσιακής μουσικής και χορού από όλη την Ελλάδα.',
- 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=600', '#'),
-
-(3, 'Αναστενάρια Αγίας Ελένης', 'Anastenaria of Agia Eleni', 'anastenaria-agia-eleni', 'ΕΚΠΑΙΔΕΥΤΙΚΟ',
- '21 Μαΐου 2026', 'Αγία Ελένη, Σέρρες',
- 'Η αυθεντική τελετή Αναστεναρίων στο χωριό Αγία Ελένη.',
- 'https://images.unsplash.com/photo-1504192010706-dd7f569ee2be?w=600', '#'),
-
-(4, 'Φεστιβάλ Κρητικής Παράδοσης', 'Cretan Heritage Festival', 'festival-kritis', 'ΦΕΣΤΙΒΑΛ',
- 'Αύγουστος 2026', 'Ηράκλειο, Κρήτη',
- 'Παρουσίαση παραδοσιακών χορών, μουσικής και φορεσιών από όλη την Κρήτη.',
- 'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=600', '#');
+-- ══════════════════════════════════════════════════════════════════════
+--  NOTES FOR NEXT STEPS
+-- ══════════════════════════════════════════════════════════════════════
+-- 1. Migrate to Next.js/Astro for true dynamic routes:
+--    /regions/[slug], /costumes/[slug], /customs/[slug]
+-- 2. Add Stripe webhooks → update subscriptions table
+-- 3. Implement full-text search endpoint via Supabase RPC:
+--    SELECT * FROM costumes WHERE to_tsvector('simple', name||' '||description)
+--                                @@ plainto_tsquery('simple', $1)
+-- 4. Add Mapbox/Leaflet cluster layer using lat/lng from regions + events
+-- 5. model-viewer GLB URLs → store in costumes.model_glb_url
+-- ══════════════════════════════════════════════════════════════════════

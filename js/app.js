@@ -3,18 +3,29 @@
  * Shared UI logic for all pages
  */
 
-// ── Navigation ────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-  // Hamburger toggle
-  const hamburger = document.querySelector('.nav-hamburger');
+// ── Mobile nav toggle ─────────────────────────────────────────
+function toggleMobileNav() {
   const navLinks  = document.querySelector('.navbar-nav');
   const navActions= document.querySelector('.navbar-actions');
-  if (hamburger) {
-    hamburger.addEventListener('click', () => {
-      navLinks && navLinks.classList.toggle('open');
-      navActions && navActions.classList.toggle('open');
-    });
+  const hamburger = document.querySelector('.nav-hamburger');
+  const isOpen = navLinks && navLinks.classList.toggle('open');
+  navActions && navActions.classList.toggle('open');
+  if (hamburger) hamburger.classList.toggle('open');
+  // Close on outside click
+  if (isOpen) {
+    setTimeout(() => document.addEventListener('click', closeMobileNav, { once: true }), 10);
   }
+}
+function closeMobileNav(e) {
+  if (!e.target.closest('.navbar')) {
+    document.querySelector('.navbar-nav')?.classList.remove('open');
+    document.querySelector('.navbar-actions')?.classList.remove('open');
+    document.querySelector('.nav-hamburger')?.classList.remove('open');
+  }
+}
+
+// ── Navigation ────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
 
   // Active nav link based on page
   const currentPage = window.location.pathname.split('/').pop() || 'index.html';
@@ -144,8 +155,8 @@ function navbarHTML(active) {
     { href:'regions.html',  label:'Περιοχές' },
     { href:'costumes.html', label:'Φορεσιές' },
     { href:'customs.html',  label:'Έθιμα' },
-    { href:'viewer-3d.html',label:'3D Viewer ✦' },
-    { href:'index.html#map',label:'Χάρτης' },
+    { href:'viewer-3d.html',label:'3D Viewer' },
+    { href:'map.html',       label:'Χάρτης' },
     { href:'pricing.html',  label:'Συνδρομές' },
   ];
   const nav = links.map(l => `<a class="nav-link${l.label===active?' active':''}" href="${l.href}">${l.label}</a>`).join('');
@@ -157,9 +168,9 @@ function navbarHTML(active) {
   <div class="navbar-nav">${nav}</div>
   <div class="navbar-actions">
     <a class="btn-nav-login" href="login.html">Σύνδεση</a>
-    <a class="btn-nav-premium" href="pricing.html">Premium ✦</a>
+    <a class="btn-nav-premium" href="pricing.html">Κληρονόμος</a>
   </div>
-  <div class="nav-hamburger"><span></span><span></span><span></span></div>
+  <button class="nav-hamburger" aria-label="Μενού" onclick="toggleMobileNav()"><span></span><span></span><span></span></button>
 </nav>`;
 }
 
@@ -168,14 +179,14 @@ function footerHTML() {
   return `
 <footer>
   <div class="container">
-    <div class="footer-grid">
+    <div class="footer-top">
       <div class="footer-brand">
         <h3>Hellas <span>Heritage</span></h3>
-        <p>Ψηφιακό αρχείο ελληνικής παράδοσης — φορεσιές, έθιμα και πολιτιστική κληρονομιά από κάθε γωνιά της Ελλάδας.</p>
+        <p>Ψηφιακό αρχείο ελληνικής παράδοσης — φορεσιές, έθιμα και πολιτιστική κληρονομιά από κάθε γωνιά της Ελλάδας. Τεκμηριωμένο, διαδραστικό, ζωντανό.</p>
         <div class="footer-social">
-          <a class="social-btn" href="#">📸</a>
-          <a class="social-btn" href="#">📘</a>
-          <a class="social-btn" href="#">🎥</a>
+          <a class="social-btn" href="#" aria-label="Instagram">📸</a>
+          <a class="social-btn" href="#" aria-label="Facebook">📘</a>
+          <a class="social-btn" href="#" aria-label="YouTube">🎥</a>
         </div>
       </div>
       <div class="footer-col">
@@ -184,7 +195,8 @@ function footerHTML() {
           <li><a href="regions.html">Περιοχές</a></li>
           <li><a href="costumes.html">Φορεσιές</a></li>
           <li><a href="customs.html">Έθιμα</a></li>
-          <li><a href="index.html#events">Εκδηλώσεις</a></li>
+          <li><a href="map.html">Διαδρ. Χάρτης</a></li>
+          <li><a href="viewer-3d.html">3D Viewer</a></li>
         </ul>
       </div>
       <div class="footer-col">
@@ -192,15 +204,17 @@ function footerHTML() {
         <ul>
           <li><a href="pricing.html">Συνδρομές</a></li>
           <li><a href="login.html">Σύνδεση</a></li>
-          <li><a href="login.html">Εγγραφή</a></li>
+          <li><a href="login.html">Δωρεάν Εγγραφή</a></li>
+          <li><a href="pricing.html">Εκπαιδευτικά</a></li>
         </ul>
       </div>
       <div class="footer-col">
-        <h4>Επικοινωνία</h4>
+        <h4>Πληροφορίες</h4>
         <ul>
-          <li><a href="#">info@hellasheritage.gr</a></li>
           <li><a href="#">Σχετικά με εμάς</a></li>
+          <li><a href="#">info@hellasheritage.gr</a></li>
           <li><a href="#">Πολιτική Απορρήτου</a></li>
+          <li><a href="#">Βιβλιογραφία</a></li>
         </ul>
       </div>
     </div>
@@ -218,4 +232,20 @@ document.addEventListener('DOMContentLoaded', () => {
   if (navEl) navEl.outerHTML = navbarHTML(navEl.dataset.active || '');
   const ftEl = document.getElementById('footer-placeholder');
   if (ftEl) ftEl.outerHTML = footerHTML();
+
+  // Navbar scroll behaviour (for non-hero pages — start scrolled)
+  const navbar = document.querySelector('.navbar');
+  if (navbar) {
+    const heroEl = document.querySelector('.hero');
+    if (!heroEl) navbar.classList.add('scrolled');  // non-hero pages start white
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 40);
+    }, { passive: true });
+  }
+
+  // Global scroll reveal
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('visible'); io.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal,.reveal-left').forEach(el => io.observe(el));
 });

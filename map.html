@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Χάρτης Ελλάδας — Hellas Heritage</title>
+  <meta name="description" content="Διαδραστικός χάρτης ελληνικής πολιτιστικής κληρονομιάς — φορεσιές, έθιμα και παραδόσεις ανά περιοχή.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    .map-page { background:#f0f4f0; }
+
+    /* Full-height map container */
+    #map {
+      width: 100%;
+      height: calc(100vh - 68px - 56px);
+      min-height: 500px;
+      z-index: 1;
+    }
+
+    /* Filter bar above map */
+    .map-filterbar {
+      background: white;
+      border-bottom: 1px solid #e0e0e0;
+      padding: .6rem 1.5rem;
+      display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+      height: 56px; box-shadow: 0 2px 8px rgba(0,0,0,.08);
+      z-index: 10; position: relative;
+    }
+    .map-filter-label {
+      font-size: .75rem; font-weight: 700; color: #9A9893;
+      text-transform: uppercase; letter-spacing: 1px;
+    }
+    .map-filter-btn {
+      padding: .35rem .9rem; border-radius: 50px;
+      border: 1.5px solid #E8E5DF; background: white;
+      font-size: .82rem; font-weight: 600; color: #58574F;
+      cursor: pointer; transition: all .2s;
+    }
+    .map-filter-btn:hover  { border-color: #C9A030; color: #C9A030; }
+    .map-filter-btn.active { background: #1B3A5C; border-color: #1B3A5C; color: white; }
+    .map-filter-sep { width: 1px; height: 20px; background: #E8E5DF; }
+    .map-count { margin-left: auto; font-size: .8rem; color: #9A9893; }
+
+    /* Leaflet popup customisation */
+    .leaflet-popup-content-wrapper {
+      border-radius: 16px !important;
+      box-shadow: 0 8px 32px rgba(11,29,53,.18) !important;
+      padding: 0 !important; overflow: hidden;
+      min-width: 240px;
+    }
+    .leaflet-popup-content { margin: 0 !important; width: auto !important; }
+    .leaflet-popup-tip-container { display: none; }
+
+    /* Custom popup card */
+    .pop-img { width: 100%; height: 140px; object-fit: cover; display: block; }
+    .pop-body { padding: 1rem 1.1rem 1.1rem; }
+    .pop-region { font-size: .68rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #C9A030; margin-bottom: .25rem; }
+    .pop-name { font-family: 'Playfair Display', Georgia, serif; font-size: 1.05rem; font-weight: 700; color: #0B1D35; margin-bottom: .2rem; }
+    .pop-sub  { font-size: .78rem; color: #9A9893; margin-bottom: .75rem; }
+    .pop-stats { display: flex; gap: 1rem; margin-bottom: .85rem; }
+    .pop-stat  { text-align: center; }
+    .pop-stat strong { display: block; font-size: 1.1rem; font-weight: 700; color: #1B3A5C; font-family: 'Playfair Display',serif; }
+    .pop-stat span   { font-size: .65rem; text-transform: uppercase; letter-spacing: 1px; color: #9A9893; }
+    .pop-btn {
+      display: block; text-align: center; padding: .55rem;
+      background: linear-gradient(135deg, #C9A030, #A87B10);
+      color: white; border-radius: 8px; font-size: .82rem; font-weight: 700;
+      text-decoration: none; transition: opacity .2s;
+    }
+    .pop-btn:hover { opacity: .88; }
+
+    /* Custom gold marker */
+    .hh-marker {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, #C9A030, #A87B10);
+      border-radius: 50% 50% 50% 0;
+      transform: rotate(-45deg);
+      border: 3px solid white;
+      box-shadow: 0 4px 14px rgba(0,0,0,.3);
+      cursor: pointer;
+      transition: transform .2s;
+    }
+    .hh-marker:hover { transform: rotate(-45deg) scale(1.15); }
+    .hh-marker-inner {
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      transform: rotate(45deg);
+      font-size: .85rem;
+    }
+
+    /* Leaflet zoom controls style */
+    .leaflet-control-zoom {
+      border: none !important;
+      box-shadow: 0 4px 16px rgba(0,0,0,.15) !important;
+    }
+    .leaflet-control-zoom a {
+      width: 36px !important; height: 36px !important;
+      line-height: 36px !important;
+      font-size: 1.1rem !important;
+      border-radius: 8px !important;
+      color: #1B3A5C !important;
+      background: white !important;
+      font-weight: 700 !important;
+    }
+    .leaflet-control-zoom a:hover { background: #F4F2EE !important; }
+
+    /* Legend */
+    .map-legend {
+      position: absolute; bottom: 2rem; left: 1rem; z-index: 500;
+      background: white; border-radius: 12px;
+      padding: .75rem 1rem; box-shadow: 0 4px 16px rgba(0,0,0,.12);
+      font-size: .78rem;
+    }
+    .map-legend-title { font-weight: 700; color: #1B3A5C; margin-bottom: .5rem; font-size: .72rem; text-transform: uppercase; letter-spacing: 1px; }
+    .legend-item { display: flex; align-items: center; gap: .5rem; margin-bottom: .35rem; color: #58574F; }
+    .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+
+    @media (max-width: 768px) {
+      #map { height: calc(100vh - 68px - 56px); }
+      .map-filterbar { padding: .5rem 1rem; gap: .5rem; height: auto; min-height: 48px; }
+    }
+  </style>
+</head>
+<body>
+<div id="navbar-placeholder" data-active="Χάρτης"></div>
+
+<div class="page-wrapper map-page">
+
+  <!-- Filter bar -->
+  <div class="map-filterbar">
+    <span class="map-filter-label">Φίλτρο:</span>
+    <button class="map-filter-btn active" onclick="filterMap('all',this)">🗺 Όλα</button>
+    <button class="map-filter-btn" onclick="filterMap('costumes',this)">👘 Φορεσιές</button>
+    <button class="map-filter-btn" onclick="filterMap('customs',this)">🎭 Έθιμα</button>
+    <div class="map-filter-sep"></div>
+    <button class="map-filter-btn" onclick="filterMap('featured',this)">⭐ Δημοφιλή</button>
+    <span class="map-count" id="map-count">Φόρτωση...</span>
+  </div>
+
+  <!-- Map -->
+  <div id="map"></div>
+
+</div>
+
+<script src="js/data.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/app.js"></script>
+<script>
+// ══════════════════════════════════════════════════════
+//  HELLAS HERITAGE — Interactive Map
+//  Tiles: OpenStreetMap (ελληνικές ετικέτες, πράσινη γη)
+//  Matches Apple Maps aesthetic
+// ══════════════════════════════════════════════════════
+
+// Init map centred on Greece
+const map = L.map('map', {
+  center: [38.8, 23.5],
+  zoom: 6,
+  zoomControl: false,
+  attributionControl: true,
+});
+
+// ── Tile Layer — OpenStreetMap (closest to Apple Maps look) ──
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  maxZoom: 18,
+  subdomains: 'abc',
+}).addTo(map);
+
+// Zoom control — bottom right
+L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+// ── Custom gold pin icon ──────────────────────────────
+function makeIcon(emoji) {
+  return L.divIcon({
+    className: '',
+    html: `<div class="hh-marker"><div class="hh-marker-inner">${emoji}</div></div>`,
+    iconSize: [36, 36],
+    iconAnchor: [18, 36],
+    popupAnchor: [0, -38],
+  });
+}
+
+const ICONS = {
+  region:  makeIcon('📍'),
+  costume: makeIcon('👘'),
+  custom:  makeIcon('🎭'),
+  event:   makeIcon('🎉'),
+};
+
+// ── Markers store ─────────────────────────────────────
+let allMarkers = [];
+let currentFilter = 'all';
+
+// ── Build popup HTML ──────────────────────────────────
+function regionPopup(r) {
+  return `
+    <img class="pop-img" src="${r.image}" alt="${r.name}" onerror="this.style.display='none'">
+    <div class="pop-body">
+      <div class="pop-region">${r.nameEn || ''}</div>
+      <div class="pop-name">${r.name}</div>
+      <div class="pop-sub">${r.description ? r.description.substring(0,80)+'…' : ''}</div>
+      <div class="pop-stats">
+        <div class="pop-stat"><strong>${r.costumesCount||0}</strong><span>Φορεσιές</span></div>
+        <div class="pop-stat"><strong>${r.customsCount||0}</strong><span>Έθιμα</span></div>
+      </div>
+      <a class="pop-btn" href="region.html?id=${r.id}">Εξερεύνησε →</a>
+    </div>`;
+}
+
+function costumePopup(c) {
+  return `
+    <img class="pop-img" src="${c.image}" alt="${c.name}" onerror="this.style.display='none'">
+    <div class="pop-body">
+      <div class="pop-region">${genderLabel(c.gender)} · ${c.period||''}</div>
+      <div class="pop-name">${c.name}</div>
+      <div class="pop-sub">${c.description ? c.description.substring(0,80)+'…' : ''}</div>
+      <a class="pop-btn" href="costume.html?id=${c.id}">Δες Φορεσιά →</a>
+    </div>`;
+}
+
+function customPopup(cu) {
+  return `
+    <img class="pop-img" src="${cu.image}" alt="${cu.name}" onerror="this.style.display='none'">
+    <div class="pop-body">
+      <div class="pop-region">${categoryLabel(cu.category)} · ${cu.periodOfYear||''}</div>
+      <div class="pop-name">${cu.name}</div>
+      <div class="pop-sub">${cu.description ? cu.description.substring(0,80)+'…' : ''}</div>
+      <a class="pop-btn" href="custom.html?id=${cu.id}">Δες Έθιμο →</a>
+    </div>`;
+}
+
+// ── Add markers ───────────────────────────────────────
+function addMarkers(HH) {
+  // Clear existing
+  allMarkers.forEach(m => map.removeLayer(m.layer));
+  allMarkers = [];
+
+  // Regions
+  HH.regions.filter(r => r.lat && r.lng).forEach(r => {
+    const m = L.marker([r.lat, r.lng], { icon: ICONS.region })
+      .bindPopup(regionPopup(r), { maxWidth: 280 });
+    m.addTo(map);
+    allMarkers.push({ layer: m, type: 'region', featured: r.featured });
+  });
+
+  // Costumes (offset slightly so they don't overlap regions)
+  HH.costumes.filter(c => {
+    const region = HH.regions.find(r => r.id === c.regionId);
+    return region && region.lat && region.lng;
+  }).forEach(c => {
+    const region = HH.regions.find(r => r.id === c.regionId);
+    const jitterLat = region.lat + (Math.random() - 0.5) * 0.15;
+    const jitterLng = region.lng + (Math.random() - 0.5) * 0.15;
+    const m = L.marker([jitterLat, jitterLng], { icon: ICONS.costume })
+      .bindPopup(costumePopup(c), { maxWidth: 280 });
+    allMarkers.push({ layer: m, type: 'costume', featured: c.featured });
+  });
+
+  // Customs
+  HH.customs.filter(cu => {
+    const region = HH.regions.find(r => r.id === cu.regionId);
+    return region && region.lat && region.lng;
+  }).forEach(cu => {
+    const region = HH.regions.find(r => r.id === cu.regionId);
+    const jitterLat = region.lat + (Math.random() - 0.5) * 0.18;
+    const jitterLng = region.lng + (Math.random() - 0.5) * 0.18;
+    const m = L.marker([jitterLat, jitterLng], { icon: ICONS.custom })
+      .bindPopup(customPopup(cu), { maxWidth: 280 });
+    allMarkers.push({ layer: m, type: 'custom', featured: cu.featured });
+  });
+
+  applyFilter(currentFilter);
+}
+
+// ── Filter logic ──────────────────────────────────────
+function filterMap(type, btn) {
+  currentFilter = type;
+  document.querySelectorAll('.map-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilter(type);
+}
+
+function applyFilter(type) {
+  let visible = 0;
+  allMarkers.forEach(({ layer, type: mtype, featured }) => {
+    const show =
+      type === 'all'      ? true :
+      type === 'featured' ? featured :
+      type === 'costumes' ? mtype === 'costume' :
+      type === 'customs'  ? mtype === 'custom'  :
+      mtype === 'region';
+
+    if (show) { layer.addTo(map); visible++; }
+    else       { map.removeLayer(layer); }
+  });
+  document.getElementById('map-count').textContent = visible + ' σημεία';
+}
+
+// ── Greece border outline ─────────────────────────────
+// Subtle rectangle highlight over Greek territory
+const greeceBounds = [[34.8, 19.3], [41.8, 29.7]];
+L.rectangle(greeceBounds, {
+  color: '#1B3A5C', weight: 1.5,
+  fillColor: 'transparent', dashArray: '6,6',
+  opacity: 0.25,
+}).addTo(map);
+
+// ── Init ──────────────────────────────────────────────
+window.__HH_READY.then(HH => {
+  addMarkers(HH);
+
+  // Fit map to Greece
+  map.fitBounds([[34.8, 19.3], [41.8, 29.7]], { padding: [20, 20] });
+});
+</script>
+</body>
+</html>
