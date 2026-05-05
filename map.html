@@ -121,6 +121,14 @@
       .map-filterbar { padding: .5rem 1rem; gap: .5rem; height: auto; min-height: 48px; }
     }
   </style>
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0B1D35">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Hellas Heritage">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
 </head>
 <body>
 <div id="navbar-placeholder" data-active="Χάρτης"></div>
@@ -316,6 +324,13 @@ window.__HH_READY.then(HH => {
   // Fit map to Greece
   map.fitBounds([[34.8, 19.3], [41.8, 29.7]], { padding: [20, 20] });
 });
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js', { scope: '/' })
+    .then(r => console.log('[HH] SW registered:', r.scope))
+    .catch(e => console.warn('[HH] SW failed:', e));
+}
 </script>
 </body>
 </html>

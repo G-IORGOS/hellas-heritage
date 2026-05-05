@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Έθιμα & Παραδόσεις — Hellas Heritage</title>
   <link rel="stylesheet" href="css/style.css">
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0B1D35">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Hellas Heritage">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
 </head>
 <body>
 <div id="navbar-placeholder" data-active="Έθιμα"></div>
@@ -89,6 +97,13 @@ function render() {
 
 ['filter-cat','filter-region'].forEach(id => document.getElementById(id).addEventListener('change', render));
 document.getElementById('search-input').addEventListener('input', render);
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js', { scope: '/' })
+    .then(r => console.log('[HH] SW registered:', r.scope))
+    .catch(e => console.warn('[HH] SW failed:', e));
+}
 </script>
 </body>
 </html>

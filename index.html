@@ -14,6 +14,21 @@
   <meta name="twitter:card" content="summary_large_image">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Hellas Heritage","description":"Ψηφιακό αρχείο ελληνικής πολιτιστικής κληρονομιάς"}</script>
   <link rel="stylesheet" href="css/style.css">
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0B1D35">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Hellas Heritage">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="icons/icon-144.png">
+  <link rel="apple-touch-icon" sizes="128x128" href="icons/icon-128.png">
+  <link rel="apple-touch-startup-image" href="icons/icon-512.png">
+  <meta name="msapplication-TileImage" content="icons/icon-144.png">
+  <meta name="msapplication-TileColor" content="#0B1D35">
 </head>
 <body>
 <div id="navbar-placeholder" data-active=""></div>
@@ -392,6 +407,95 @@ window.__HH_READY.then(() => {
     document.querySelectorAll('.reveal:not(.visible),.reveal-left:not(.visible)').forEach(el=>io.observe(el));
   }, 100);
 });
+
+// ── PWA: Service Worker Registration ─────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' })
+      .then(reg => {
+        console.log('[HH] Service Worker registered:', reg.scope);
+        // Check for updates every 60 min
+        setInterval(() => reg.update(), 60 * 60 * 1000);
+      })
+      .catch(err => console.warn('[HH] SW registration failed:', err));
+  });
+}
+
+// ── PWA: Install prompt (A2HS) ────────────────────────────────────────────
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Show install banner after 3 seconds on first visit
+  const installed = localStorage.getItem('hh-pwa-installed');
+  if (!installed) {
+    setTimeout(() => showInstallBanner(), 3000);
+  }
+});
+
+window.addEventListener('appinstalled', () => {
+  localStorage.setItem('hh-pwa-installed', '1');
+  hideInstallBanner();
+  console.log('[HH] PWA installed!');
+});
+
+function showInstallBanner() {
+  if (document.getElementById('hh-install-banner')) return;
+  const banner = document.createElement('div');
+  banner.id = 'hh-install-banner';
+  banner.style.cssText = `
+    position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%);
+    background:#0B1D35; color:white; padding:.9rem 1.4rem;
+    border-radius:16px; box-shadow:0 8px 32px rgba(0,0,0,.35);
+    display:flex; align-items:center; gap:1rem; z-index:9999;
+    font-family:inherit; font-size:.88rem; max-width:360px; width:90%;
+    animation: slideUp .4s ease;
+  `;
+  banner.innerHTML = `
+    <span style="font-size:1.5rem">🏛</span>
+    <div style="flex:1">
+      <strong style="display:block;margin-bottom:.1rem">Εγκατάστασε την εφαρμογή</strong>
+      <span style="opacity:.75;font-size:.8rem">Hellas Heritage στην αρχική οθόνη σου</span>
+    </div>
+    <button onclick="triggerInstall()" style="background:linear-gradient(135deg,#C9A030,#A87B10);color:white;border:none;border-radius:8px;padding:.45rem .9rem;font-weight:700;cursor:pointer;font-size:.82rem">
+      Εγκατάσταση
+    </button>
+    <button onclick="hideInstallBanner()" style="background:none;border:none;color:rgba(255,255,255,.6);font-size:1.2rem;cursor:pointer;padding:0 .2rem">✕</button>
+  `;
+  const style = document.createElement('style');
+  style.textContent = '@keyframes slideUp{from{transform:translateX(-50%) translateY(100px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}';
+  document.head.appendChild(style);
+  document.body.appendChild(banner);
+}
+
+function hideInstallBanner() {
+  document.getElementById('hh-install-banner')?.remove();
+}
+
+function triggerInstall() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(choice => {
+    if (choice.outcome === 'accepted') localStorage.setItem('hh-pwa-installed','1');
+    deferredPrompt = null;
+    hideInstallBanner();
+  });
+}
+
+// ── PWA: Push Notifications ────────────────────────────────────────────────
+async function requestPushPermission() {
+  if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
+  const permission = await Notification.requestPermission();
+  if (permission === 'granted') {
+    console.log('[HH] Push notifications enabled');
+    // Subscribe to push (VAPID key needed for production)
+    // const reg = await navigator.serviceWorker.ready;
+    // const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: VAPID_PUBLIC_KEY });
+    // await fetch('/api/push-subscribe', { method:'POST', body: JSON.stringify(sub) });
+  }
+}
+// Expose globally for settings page
+window.hhRequestPush = requestPushPermission;
 </script>
 </body>
 </html>
