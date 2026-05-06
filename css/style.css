@@ -914,6 +914,101 @@ footer { background: var(--navy-dark); color: rgba(255,255,255,.65); padding: 5.
 }
 
 /* ═══════════════════════════════════════════════════════════
+   BOTTOM NAVIGATION BAR
+═══════════════════════════════════════════════════════════ */
+.bottom-nav {
+  display: none; /* κρυφό σε desktop */
+}
+
+@media (max-width: 768px) {
+  .bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 2000;
+    background: rgba(255, 255, 255, 0.97);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--grey-200);
+    box-shadow: 0 -4px 24px rgba(11, 29, 53, 0.10);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    height: calc(64px + env(safe-area-inset-bottom, 0px));
+    align-items: stretch;
+    justify-content: space-around;
+  }
+
+  .bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    gap: 3px;
+    color: var(--grey-400);
+    text-decoration: none;
+    transition: color .2s ease;
+    padding: 8px 4px;
+    min-width: 0;
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+  }
+
+  .bottom-nav-item::before {
+    content: '';
+    position: absolute;
+    top: 6px; left: 50%;
+    transform: translateX(-50%) scaleX(0);
+    width: 32px; height: 3px;
+    border-radius: 2px;
+    background: var(--gold);
+    transition: transform .25s cubic-bezier(.4,0,.2,1);
+  }
+
+  .bottom-nav-item.active::before {
+    transform: translateX(-50%) scaleX(1);
+  }
+
+  .bottom-nav-item.active {
+    color: var(--navy);
+  }
+
+  .bottom-nav-icon {
+    width: 24px; height: 24px;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform .2s ease;
+  }
+
+  .bottom-nav-icon svg {
+    width: 22px; height: 22px;
+  }
+
+  .bottom-nav-item.active .bottom-nav-icon {
+    transform: translateY(-2px);
+  }
+
+  .bottom-nav-item.active .bottom-nav-icon svg {
+    stroke: var(--gold);
+    stroke-width: 2.5;
+  }
+
+  .bottom-nav-label {
+    font-size: 10px;
+    font-weight: 500;
+    font-family: var(--font-sans);
+    letter-spacing: .3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  .bottom-nav-item.active .bottom-nav-label {
+    font-weight: 700;
+    color: var(--navy);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
    CAPACITOR / iOS APP — Mobile Fixes
 ═══════════════════════════════════════════════════════════ */
 @media (max-width: 480px) {
