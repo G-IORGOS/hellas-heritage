@@ -41,7 +41,13 @@
 
 /* ── Reset & Base ───────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+  overscroll-behavior: none;
+  overscroll-behavior-y: none;
+  height: 100%;
+}
 body {
   font-family: var(--font-sans);
   color: var(--text);
@@ -49,6 +55,17 @@ body {
   line-height: 1.7;
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  overscroll-behavior: none;
+  overscroll-behavior-y: none;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100vw;
+  position: relative;
+  /* iOS safe areas */
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 img { display: block; max-width: 100%; }
 a  { color: inherit; text-decoration: none; }
@@ -79,8 +96,8 @@ p  { color: var(--text-light); }
 .reveal-left.visible { opacity: 1; transform: translateX(0); }
 
 /* ── Container ──────────────────────────────────────────────── */
-.container { max-width: 1280px; margin: 0 auto; padding: 0 2rem; }
-.container-wide { max-width: 1480px; margin: 0 auto; padding: 0 2rem; }
+.container { max-width: 1280px; margin: 0 auto; padding: 0 2rem; width: 100%; }
+.container-wide { max-width: 1480px; margin: 0 auto; padding: 0 2rem; width: 100%; }
 
 /* ── Grids ──────────────────────────────────────────────────── */
 .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.75rem; }
@@ -114,13 +131,18 @@ section.tight { padding: 3.5rem 0; }
 ═══════════════════════════════════════════════════════════ */
 .navbar {
   position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  top: env(safe-area-inset-top, 0px);
   background: rgba(11,29,53,0);
   backdrop-filter: blur(0px);
   border-bottom: 1px solid transparent;
   padding: 0 2.5rem;
+  padding-left: max(2.5rem, env(safe-area-inset-left, 0px));
+  padding-right: max(2.5rem, env(safe-area-inset-right, 0px));
   height: 80px;
   display: flex; align-items: center; justify-content: space-between;
   transition: background .5s ease, backdrop-filter .5s, border-color .5s, height .4s, box-shadow .5s;
+  width: 100%;
+  max-width: 100vw;
 }
 .navbar.scrolled {
   background: rgba(255,255,255,.97);
@@ -889,4 +911,66 @@ footer { background: var(--navy-dark); color: rgba(255,255,255,.65); padding: 5.
   .story-section { gap: 3rem; }
   .story-image-accent { display: none; }
   .story-stats { gap: 1.5rem; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CAPACITOR / iOS APP — Mobile Fixes
+═══════════════════════════════════════════════════════════ */
+@media (max-width: 480px) {
+  html, body {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+    width: 100% !important;
+  }
+
+  /* Prevent horizontal overflow on ALL elements */
+  * { max-width: 100% !important; }
+  img, video, iframe, canvas { max-width: 100% !important; width: 100%; }
+
+  /* Tighter container padding on small screens */
+  .container, .container-wide { padding: 0 1rem; }
+
+  /* Navbar safe area */
+  .navbar {
+    padding: 0 1rem;
+    padding-left: max(1rem, env(safe-area-inset-left, 0px));
+    padding-right: max(1rem, env(safe-area-inset-right, 0px));
+  }
+
+  /* Page wrapper accounts for navbar + notch */
+  .page-wrapper {
+    padding-top: calc(68px + env(safe-area-inset-top, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* Hero fits screen */
+  .hero { height: 100svh; min-height: unset; }
+  .hero-content { padding: 0 1rem 5rem; }
+  .hero h1 { font-size: clamp(1.8rem, 7vw, 2.6rem); }
+
+  /* Grids always single column on phone */
+  .grid-2, .grid-3, .grid-4,
+  .editorial-grid, .editorial-grid-3,
+  .pricing-grid { grid-template-columns: 1fr !important; }
+
+  /* Cards no hover animation on touch */
+  .card:hover, .feature-box:hover { transform: none !important; }
+
+  /* Sections spacing */
+  section { padding: 3rem 0; }
+
+  /* Footer bottom padding for home indicator */
+  .site-footer {
+    padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Filters wrap properly */
+  .filters-bar { flex-wrap: wrap; gap: .75rem; }
+  .filter-group, .filter-search { min-width: 100% !important; width: 100%; }
+
+  /* Map */
+  #map-leaflet { height: 320px; }
+
+  /* Buttons full width on mobile */
+  .hero-actions .btn { width: 100%; justify-content: center; }
 }
