@@ -162,15 +162,17 @@ function navbarHTML(active) {
   const nav = links.map(l => `<a class="nav-link${l.label===active?' active':''}" href="${l.href}">${l.label}</a>`).join('');
   return `
 <nav class="navbar">
-  <a class="navbar-brand" href="index.html">
-    <div class="navbar-logo-text">Hellas <span>Heritage</span></div>
-  </a>
-  <div class="navbar-nav">${nav}</div>
-  <div class="navbar-actions">
-    <a class="btn-nav-login" href="login.html">Σύνδεση</a>
-    <a class="btn-nav-premium" href="pricing.html">Κληρονόμος</a>
+  <div class="navbar-content">
+    <a class="navbar-brand" href="index.html">
+      <div class="navbar-logo-text">Hellas <span>Heritage</span></div>
+    </a>
+    <div class="navbar-nav">${nav}</div>
+    <div class="navbar-actions">
+      <a class="btn-nav-login" href="login.html">Σύνδεση</a>
+      <a class="btn-nav-premium" href="pricing.html">Κληρονόμος</a>
+    </div>
+    <button class="nav-hamburger" aria-label="Μενού" onclick="toggleMobileNav()"><span></span><span></span><span></span></button>
   </div>
-  <button class="nav-hamburger" aria-label="Μενού" onclick="toggleMobileNav()"><span></span><span></span><span></span></button>
 </nav>`;
 }
 
