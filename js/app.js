@@ -3,25 +3,25 @@
  * Shared UI logic for all pages
  */
 
-// ── Mobile nav toggle ─────────────────────────────────────────
+// ── Mobile Menu (Professional Drawer) ────────────────────────
 function toggleMobileNav() {
-  const navLinks  = document.querySelector('.navbar-nav');
-  const navActions= document.querySelector('.navbar-actions');
+  const drawer  = document.getElementById('mobileMenuDrawer');
+  const overlay = document.getElementById('mobileMenuOverlay');
   const hamburger = document.querySelector('.nav-hamburger');
-  const isOpen = navLinks && navLinks.classList.toggle('open');
-  navActions && navActions.classList.toggle('open');
-  if (hamburger) hamburger.classList.toggle('open');
-  // Close on outside click
-  if (isOpen) {
-    setTimeout(() => document.addEventListener('click', closeMobileNav, { once: true }), 10);
-  }
+  if (!drawer) return;
+  const isOpen = drawer.classList.toggle('open');
+  overlay && overlay.classList.toggle('open', isOpen);
+  hamburger && hamburger.classList.toggle('open', isOpen);
+  document.body.style.overflow = isOpen ? 'hidden' : '';
 }
-function closeMobileNav(e) {
-  if (!e.target.closest('.navbar')) {
-    document.querySelector('.navbar-nav')?.classList.remove('open');
-    document.querySelector('.navbar-actions')?.classList.remove('open');
-    document.querySelector('.nav-hamburger')?.classList.remove('open');
-  }
+function closeMobileNav() {
+  const drawer  = document.getElementById('mobileMenuDrawer');
+  const overlay = document.getElementById('mobileMenuOverlay');
+  const hamburger = document.querySelector('.nav-hamburger');
+  drawer  && drawer.classList.remove('open');
+  overlay && overlay.classList.remove('open');
+  hamburger && hamburger.classList.remove('open');
+  document.body.style.overflow = '';
 }
 
 // ── Navigation ────────────────────────────────────────────────
@@ -152,26 +152,51 @@ function renderCustomCard(cu) {
 // ── Standard Navbar HTML ──────────────────────────────────────
 function navbarHTML(active) {
   const links = [
-    { href:'regions.html',  label:'Περιοχές' },
-    { href:'costumes.html', label:'Φορεσιές' },
-    { href:'customs.html',  label:'Έθιμα' },
-    { href:'viewer-3d.html',label:'3D Viewer' },
-    { href:'map.html',       label:'Χάρτης' },
-    { href:'pricing.html',  label:'Συνδρομές' },
+    { href:'regions.html',   label:'Περιοχές',   icon:'🏛️' },
+    { href:'costumes.html',  label:'Φορεσιές',   icon:'👗' },
+    { href:'customs.html',   label:'Έθιμα',      icon:'🛡️' },
+    { href:'viewer-3d.html', label:'3D Viewer',  icon:'🎭' },
+    { href:'map.html',       label:'Χάρτης',     icon:'🗺️' },
+    { href:'pricing.html',   label:'Συνδρομές',  icon:'⭐' },
   ];
-  const nav = links.map(l => `<a class="nav-link${l.label===active?' active':''}" href="${l.href}">${l.label}</a>`).join('');
+  const desktopNav = links.map(l =>
+    `<a class="nav-link${l.label===active?' active':''}" href="${l.href}">${l.label}</a>`
+  ).join('');
+  const mobileLinks = links.map(l =>
+    `<a class="${l.label===active?'active':''}" href="${l.href}" onclick="closeMobileNav()">
+      <span style="margin-right:.65rem;font-size:1.1rem">${l.icon}</span>${l.label}
+    </a>`
+  ).join('');
+
   return `
+<!-- Overlay -->
+<div class="mobile-menu-overlay" id="mobileMenuOverlay" onclick="closeMobileNav()"></div>
+<!-- Drawer -->
+<div class="mobile-menu-drawer" id="mobileMenuDrawer">
+  <div class="mobile-menu-header">
+    <div class="mobile-menu-logo">Hellas <span>Heritage</span></div>
+    <button class="mobile-menu-close" onclick="closeMobileNav()" aria-label="Κλείσιμο">✕</button>
+  </div>
+  <div class="mobile-menu-links">${mobileLinks}</div>
+  <div class="mobile-menu-actions">
+    <a class="btn-nav-login" href="login.html" onclick="closeMobileNav()">Σύνδεση</a>
+    <a class="btn-nav-premium" href="pricing.html" onclick="closeMobileNav()">Κληρονόμος ⭐</a>
+  </div>
+</div>
+<!-- Navbar -->
 <nav class="navbar">
   <div class="navbar-content">
     <a class="navbar-brand" href="index.html">
       <div class="navbar-logo-text">Hellas <span>Heritage</span></div>
     </a>
-    <div class="navbar-nav">${nav}</div>
+    <div class="navbar-nav">${desktopNav}</div>
     <div class="navbar-actions">
       <a class="btn-nav-login" href="login.html">Σύνδεση</a>
       <a class="btn-nav-premium" href="pricing.html">Κληρονόμος</a>
     </div>
-    <button class="nav-hamburger" aria-label="Μενού" onclick="toggleMobileNav()"><span></span><span></span><span></span></button>
+    <button class="nav-hamburger" aria-label="Μενού" onclick="toggleMobileNav()">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </nav>`;
 }
